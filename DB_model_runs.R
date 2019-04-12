@@ -10,3 +10,30 @@
 
 #Model functions are defined in separate files and saved in the folder "Models". This script
 #uploads these functions from source files. 
+
+###############################################################################################
+#required R labraries are uploaded
+library(deSolve)
+library(dplyr)
+library(FME)
+library(reshape)
+library(ggplot2)
+library(foreach)
+library(doParallel)
+library(DEoptim)
+###############################################################################################
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#####################################Model calibration#########################################
+########################################Jolanta data###########################################
+#read the measured data
+cal_data<-read.csv("./DB_concept/Hasan_Jolanta/hasan_jolanta.csv")
+
+#Data contains aerobic and anaerobic incubations.
+#Only aerobic incubation data are used. 
+#The calibration is done separately for soils from Plesne catchment watershed (PL) 
+#and Certovo catchment watershed (CT)
+source("Models/DB_cal.R")
+PL_cal<-DB_cal(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal<-DB_cal(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
