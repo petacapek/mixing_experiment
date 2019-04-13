@@ -34,6 +34,32 @@ cal_data<-read.csv("./DB_concept/Hasan_Jolanta/hasan_jolanta.csv")
 #Only aerobic incubation data are used. 
 #The calibration is done separately for soils from Plesne catchment watershed (PL) 
 #and Certovo catchment watershed (CT)
-source("Models/DB_cal.R")
-PL_cal<-DB_cal(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
-CT_cal<-DB_cal(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+##################################Three different model formulations are tested and the best one is selected###################################################
+#1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
+source("Models/DB_cal_death.R")
+PL_cal_death<-DB_cal_death(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_death<-DB_cal_death(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+PL_cal_death$pars
+CT_cal_death$pars
+
+PL_cal_death$goodness$Gfit
+CT_cal_death$goodness$Gfit
+
+ggplot(PL_cal_death$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_death$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_death$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_death$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+#2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
+source("Models/DB_cal_resp.R")
+PL_cal_resp<-DB_cal_resp(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_resp<-DB_cal_resp(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+PL_cal_resp$pars
+CT_cal_resp$pars
+
+PL_cal_resp$goodness$Gfit
+CT_cal_resp$goodness$Gfit
+
+ggplot(PL_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")

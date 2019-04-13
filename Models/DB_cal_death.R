@@ -1,4 +1,4 @@
-DB_cal<-function(dataset){
+DB_cal_death<-function(dataset){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -290,6 +290,7 @@ DB_cal<-function(dataset){
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
                            parms=opt_par$optim$bestmem, db_model, times=t_simul))
+  Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned
   #1. best model parameter
@@ -300,7 +301,7 @@ DB_cal<-function(dataset){
   f_out<-list(pars=opt_par$optim$bestmem,
               goodness=fit,
               par_mcmc=par_mcmc,
-              simul=simul)
+              simul=Simul)
   
   return(f_out)
 }
