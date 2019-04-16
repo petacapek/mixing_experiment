@@ -95,3 +95,15 @@ CT_cal_respW$goodness$Gfit
 
 ggplot(PL_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+
+#################################################################################################
+#################################################################################################
+##################################Model application##############################################
+#################################################################################################
+#################################################################################################
+#Now, model is applied to understand the carbon mass balance in the mixing experiment
+#Model parameters estimated in previous steps are used.
+#mean estimates of fr and fs parameters are used without acknowledging the possible variability (these parameters are fixed)
+#The rest of the parameters are estimated again but the lower and upper bounds of parameter
+#estimates are used to define the parameter space.
