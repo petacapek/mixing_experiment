@@ -227,7 +227,7 @@ DB_cal_resp<-function(dataset){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     CO2_12C=0, CO2_13C=0), 
-                                parms=parpar[1:11], db_model, times=t_sampling))
+                                parms=par[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))

@@ -35,7 +35,7 @@ cal_data<-read.csv("./DB_concept/Hasan_Jolanta/hasan_jolanta.csv")
 #The calibration is done separately for soils from Plesne catchment watershed (PL) 
 #and Certovo catchment watershed (CT)
 
-##################################Three different model formulations are tested and the best one is selected###################################################
+##################################Two different model formulations are tested and the best one is selected###################################################
 #1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
 source("Models/DB_cal_death.R")
 PL_cal_death<-DB_cal_death(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
