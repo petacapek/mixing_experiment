@@ -47,9 +47,9 @@ DB_cal_death<-function(dataset){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose))
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -141,7 +141,7 @@ DB_cal_death<-function(dataset){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par, db_model, times=t_sampling))
+                                parms=parpar[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -233,7 +233,7 @@ DB_cal_death<-function(dataset){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par, db_model, times=t_sampling))
+                                parms=parpar[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
