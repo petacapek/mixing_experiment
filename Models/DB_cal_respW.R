@@ -1,4 +1,4 @@
-DB_cal_resp<-function(dataset){
+DB_cal_respW<-function(dataset){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -122,8 +122,8 @@ DB_cal_resp<-function(dataset){
     S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-par[["fr"]]*R_13Cinit)/par[["fs"]]
     G_12Cinit=as.numeric(dataset[1, "G12init"])
     G_13Cinit=as.numeric(dataset[1, "G13init"])
-    DOC_12Cinit=as.numeric(dataset[1, "DOC12init"])
-    DOC_13Cinit=as.numeric(dataset[1, "DOC13init"])
+    DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
+    DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
     #Cres and CO2 pools are initialy 0
     
     #time of the sampling
@@ -145,7 +145,7 @@ DB_cal_resp<-function(dataset){
     
     #add the measured data
     Yhat$obs<-c(as.numeric(dataset[,"G12"]), as.numeric(dataset[,"G13"]),
-                as.numeric(dataset[,"DOC12"]), as.numeric(dataset[,"DOC13"]),
+                as.numeric(dataset[,"WOC12"]), as.numeric(dataset[,"WOC13"]),
                 as.numeric(dataset[,"CO212"]), as.numeric(dataset[,"CO213"]),
                 as.numeric(dataset[,"Cmic12"]), as.numeric(dataset[,"Cmic13"]))
     
@@ -214,8 +214,8 @@ DB_cal_resp<-function(dataset){
     S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-par[["fr"]]*R_13Cinit)/par[["fs"]]
     G_12Cinit=as.numeric(dataset[1, "G12init"])
     G_13Cinit=as.numeric(dataset[1, "G13init"])
-    DOC_12Cinit=as.numeric(dataset[1, "DOC12init"])
-    DOC_13Cinit=as.numeric(dataset[1, "DOC13init"])
+    DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
+    DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
     #Cres and CO2 pools are initialy 0
     
     #time of the sampling
@@ -237,7 +237,7 @@ DB_cal_resp<-function(dataset){
     
     #add the measured data
     Yhat$obs<-c(as.numeric(dataset[,"G12"]), as.numeric(dataset[,"G13"]),
-                as.numeric(dataset[,"DOC12"]), as.numeric(dataset[,"DOC13"]),
+                as.numeric(dataset[,"WOC12"]), as.numeric(dataset[,"WOC13"]),
                 as.numeric(dataset[,"CO212"]), as.numeric(dataset[,"CO213"]),
                 as.numeric(dataset[,"Cmic12"]), as.numeric(dataset[,"Cmic13"]))
     
@@ -270,8 +270,8 @@ DB_cal_resp<-function(dataset){
   S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-opt_par$optim$bestmem[["fr"]]*R_13Cinit)/opt_par$optim$bestmem[["fs"]]
   G_12Cinit=as.numeric(dataset[1, "G12init"])
   G_13Cinit=as.numeric(dataset[1, "G13init"])
-  DOC_12Cinit=as.numeric(dataset[1, "DOC12init"])
-  DOC_13Cinit=as.numeric(dataset[1, "DOC13init"])
+  DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
+  DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
   #Cres and CO2 pools are initialy 0
   
   #time of the sampling

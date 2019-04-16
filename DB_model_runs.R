@@ -36,30 +36,62 @@ cal_data<-read.csv("./DB_concept/Hasan_Jolanta/hasan_jolanta.csv")
 #and Certovo catchment watershed (CT)
 
 ##################################Two different model formulations are tested and the best one is selected###################################################
+#As source of soil organic carbon, two possibilities are tested - K2SO4 extractable DOC and water extractable DOC.
+#Again, the best option is selected. The functions and results with K2SO4 extractable DOC are denoted
+#by using letter "K" at the end of the function/output file name.  
+#The functions and results with water extractable DOC are denoted
+#by using letter "W" at the end of the function/output file name.  
+###########################################K2SO4 extractable DOC##################################
 #1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
-source("Models/DB_cal_death.R")
-PL_cal_death<-DB_cal_death(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
-CT_cal_death<-DB_cal_death(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+source("Models/DB_cal_deathK.R")
+PL_cal_deathK<-DB_cal_deathK(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_deathK<-DB_cal_deathK(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
 
-PL_cal_death$pars
-CT_cal_death$pars
+PL_cal_deathK$pars
+CT_cal_deathK$pars
 
-PL_cal_death$goodness$Gfit
-CT_cal_death$goodness$Gfit
+PL_cal_deathK$goodness$Gfit
+CT_cal_deathK$goodness$Gfit
 
-ggplot(PL_cal_death$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_death$simul, aes(time, value))+facet_wrap(~variable, scales="free")
-ggplot(CT_cal_death$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_death$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(PL_cal_deathK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_deathK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
 #2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
-source("Models/DB_cal_resp.R")
-PL_cal_resp<-DB_cal_resp(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
-CT_cal_resp<-DB_cal_resp(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+source("Models/DB_cal_respK.R")
+PL_cal_respK<-DB_cal_respK(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_respK<-DB_cal_respK(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
 
-PL_cal_resp$pars
-CT_cal_resp$pars
+PL_cal_respK$pars
+CT_cal_respK$pars
 
-PL_cal_resp$goodness$Gfit
-CT_cal_resp$goodness$Gfit
+PL_cal_respK$goodness$Gfit
+CT_cal_respK$goodness$Gfit
+
+###########################################Water extractable DOC##################################
+#1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
+source("Models/DB_cal_deathW.R")
+PL_cal_deathW<-DB_cal_deathW(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_deathW<-DB_cal_deathW(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+PL_cal_deathW$pars
+CT_cal_deathW$pars
+
+PL_cal_deathW$goodness$Gfit
+CT_cal_deathW$goodness$Gfit
+
+ggplot(PL_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathW$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathW$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+#2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
+source("Models/DB_cal_respK.R")
+PL_cal_respW<-DB_cal_respW(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_respW<-DB_cal_respW(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+PL_cal_respW$pars
+CT_cal_respW$pars
+
+PL_cal_respW$goodness$Gfit
+CT_cal_respW$goodness$Gfit
 
 ggplot(PL_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")

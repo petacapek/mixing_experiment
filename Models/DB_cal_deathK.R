@@ -1,4 +1,4 @@
-DB_cal_death<-function(dataset){
+DB_cal_deathK<-function(dataset){
   
   #model is defined here
   db_model<-function(time, state, pars){
