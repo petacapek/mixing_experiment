@@ -100,6 +100,26 @@ ggplot(PL_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(da
 ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
 
+##################################Possible isotope discrimination################################
+#The simulations show that espetially 13C in microbial biomass is overestimated
+#Therefore, the possible isotope fractionation during uptake is tested.
+#New model structure with one additional parameter is defined and its correspondence with data is
+#tested.
+source("Models/DB_cal_deathK_D.R")
+PL_cal_deathK_D<-DB_cal_deathK_D(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
+CT_cal_deathK_D<-DB_cal_deathK_D(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
+
+PL_cal_deathK_D$pars
+CT_cal_deathK_D$pars
+
+PL_cal_deathK_D$goodness$Gfit
+CT_cal_deathK_D$goodness$Gfit
+
+ggplot(PL_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathK_D$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathK_D$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+
+
 #################################################################################################
 #################################################################################################
 ##################################Model application##############################################
