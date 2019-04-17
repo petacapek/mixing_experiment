@@ -67,6 +67,9 @@ CT_cal_respK$pars
 PL_cal_respK$goodness$Gfit
 CT_cal_respK$goodness$Gfit
 
+ggplot(PL_cal_respK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_respK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_respK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_respK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
 ###########################################Water extractable DOC##################################
 #1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
 source("Models/DB_cal_deathW.R")
@@ -83,7 +86,7 @@ ggplot(PL_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(
 ggplot(CT_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathW$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
 #2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
-source("Models/DB_cal_respK.R")
+source("Models/DB_cal_respW.R")
 PL_cal_respW<-DB_cal_respW(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
 CT_cal_respW<-DB_cal_respW(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ])
 
@@ -103,7 +106,8 @@ ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(da
 #################################################################################################
 #################################################################################################
 #Now, model is applied to understand the carbon mass balance in the mixing experiment
-#Model parameters estimated in previous steps are used.
-#mean estimates of fr and fs parameters are used without acknowledging the possible variability (these parameters are fixed)
+#Model parameters estimated in previous steps are used. K2SO4 extract is assumed as a soil carbon
+#substrate and Structures that cannot be maintained are assumed to enter DOC and Cres pools.
+#Mean estimates of fr and fs parameters are used without acknowledging the possible variability (these parameters are fixed)
 #The rest of the parameters are estimated again but the lower and upper bounds of parameter
 #estimates are used to define the parameter space.
