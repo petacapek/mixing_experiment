@@ -5,23 +5,11 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
                     rep(seq(6, 10), times=4),#A horizons - unlabelled
                     rep(seq(11, 15), times=4),#O horizons - labelled
                     rep(seq(16, 20), times=4)), times=2)#A horizons - labelled
-  ###
-  m<-mixing
-  m$id<-rep(c(rep(seq(1, 5), times=4),#O horizons - unlabelled
-              rep(seq(6, 10), times=4),#A horizons - unlabelled
-              rep(seq(11, 15), times=4),#O horizons - labelled
-              rep(seq(16, 20), times=4)), times=2)#A horizons - labelled
-  ###
   
   #2. Estimated fractions of Reserves and Structures in chloroform labile organic carbon
   #that are provided in "fractionsPL" and "fractionsCT" vectors entering the function
   dataset$fr<-as.numeric(dataset$Plesne)*fractionsPL[["fr"]]+as.numeric(dataset$Certovo)*fractionsCT[["fr"]]
   dataset$fs<-as.numeric(dataset$Plesne)*fractionsPL[["fs"]]+as.numeric(dataset$Certovo)*fractionsCT[["fs"]]
-  
-  ###
-  m$fr<-as.numeric(m$Plesne)*fractionsPL[["fr"]]+as.numeric(m$Certovo)*fractionsCT[["fr"]]
-  m$fs<-as.numeric(m$Plesne)*fractionsPL[["fs"]]+as.numeric(m$Certovo)*fractionsCT[["fs"]]
-  ###
   
   #Two models are defined. The only difference between these models is presence/absence 
   #of the glucose pool that is available for microbial consumption.
@@ -238,32 +226,15 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
     #First, minimization ("cost") function is defined
     cost<-function(x){
       
-      ###
-      unlabelled = m[m$id==1, ]
-      labelled = m[m$id==11, ]
-      
-      Rinit_guess=as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
-      Ratm_init_guess=as.numeric(unlabelled[1, "Cmicatm"])
-      
-      mpar_guess<-c(as.numeric(unlabelled[1, "Plesne"])*initPL+as.numeric(unlabelled[1, "Certovo"])*initCT,
-                    0.1*Rinit_guess, Ratm_init_guess)
-      llimit<-c(as.numeric(minpars), 1e-3*Rinit_guess, 0.5*Ratm_init_guess)
-      ulimit<-c(as.numeric(maxpars), 0.95*Rinit_guess, 1.2*Ratm_init_guess)
-      
-      names(mpar_guess)<-parnames
-      names(llimit)<-parnames
-      names(ulimit)<-parnames
-      
-      par<-mpar_guess[1:length(parnames)]
-      ###
-      
-      
       par<-x[1:length(parnames)]
       names(par)<-parnames
       
       #separate vector of parameters into "model parameters" and "initial states parameters"
+      #model parameters are further separated into parameters for "db_modelun" (mparun) and "db_modell" (mparl)
       #model parameters
-      mpar<-c(par[1:9], "fr"=as.numeric(unlabelled[1, "fr"]), "fs"=as.numeric(unlabelled[1, "fs"]))
+      mparl<-c(par[1:9], "fr"=as.numeric(unlabelled[1, "fr"]), "fs"=as.numeric(unlabelled[1, "fs"]))
+      mparun<-mparl[-c(1, 3, 5)]
+      
       #initial states parameters
       ipar<-par[10:11]
       
@@ -279,8 +250,8 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       #First set of initial parameters. The fast initial glucose sorption is accounted for.
       R_12Cinit1=ipar[["Rinit"]]*(1-ipar[["Ratm_init"]])
       R_13Cinit1=ipar[["Rinit"]]*ipar[["Ratm_init"]]
-      S_12Cinit1=(as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))-mpar[["fr"]]*R_12Cinit1)/mpar[["fs"]]
-      S_13Cinit1=(as.numeric(unlabelled[1, "Cmic"])*as.numeric(unlabelled[1, "Cmicatm"])-mpar[["fr"]]*R_13Cinit1)/mpar[["fs"]]
+      S_12Cinit1=(as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit1)/mparl[["fs"]]
+      S_13Cinit1=(as.numeric(unlabelled[1, "Cmic"])*as.numeric(unlabelled[1, "Cmicatm"])-mparl[["fr"]]*R_13Cinit1)/mparl[["fs"]]
       G_12Cinit1=as.numeric(labelled[1, "Glcorrected"])*(1-0.06296353)
       G_13Cinit1=as.numeric(labelled[1, "Glcorrected"])*0.06296353
       DOC_12Cinit1=as.numeric(unlabelled[1, "DOC2"])*(1-as.numeric(unlabelled[1, "DOCatm"]))
@@ -289,8 +260,8 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       #microbial biomass in replicate 1 and 2.
       R_12Cinit2=ipar[["Rinit"]]*(1-ipar[["Ratm_init"]])*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
       R_13Cinit2=ipar[["Rinit"]]*ipar[["Ratm_init"]]*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit2=(as.numeric(unlabelled[2, "Cmic"])*(1-as.numeric(unlabelled[2, "Cmicatm"]))-mpar[["fr"]]*R_12Cinit2)/mpar[["fs"]]
-      S_13Cinit2=(as.numeric(unlabelled[2, "Cmic"])*as.numeric(unlabelled[2, "Cmicatm"])-mpar[["fr"]]*R_13Cinit2)/mpar[["fs"]]
+      S_12Cinit2=(as.numeric(unlabelled[2, "Cmic"])*(1-as.numeric(unlabelled[2, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit2)/mparl[["fs"]]
+      S_13Cinit2=(as.numeric(unlabelled[2, "Cmic"])*as.numeric(unlabelled[2, "Cmicatm"])-mparl[["fr"]]*R_13Cinit2)/mparl[["fs"]]
       G_12Cinit2=as.numeric(labelled[2, "Glcorrected"])*(1-0.06296353)
       G_13Cinit2=as.numeric(labelled[2, "Glcorrected"])*0.06296353
       DOC_12Cinit2=as.numeric(unlabelled[2, "DOC2"])*(1-as.numeric(unlabelled[2, "DOCatm"]))
@@ -299,8 +270,8 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       #microbial biomass in replicate 1 and 3.
       R_12Cinit3=ipar[["Rinit"]]*(1-ipar[["Ratm_init"]])*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
       R_13Cinit3=ipar[["Rinit"]]*ipar[["Ratm_init"]]*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit3=(as.numeric(unlabelled[3, "Cmic"])*(1-as.numeric(unlabelled[3, "Cmicatm"]))-mpar[["fr"]]*R_12Cinit3)/mpar[["fs"]]
-      S_13Cinit3=(as.numeric(unlabelled[3, "Cmic"])*as.numeric(unlabelled[3, "Cmicatm"])-mpar[["fr"]]*R_13Cinit3)/mpar[["fs"]]
+      S_12Cinit3=(as.numeric(unlabelled[3, "Cmic"])*(1-as.numeric(unlabelled[3, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit3)/mparl[["fs"]]
+      S_13Cinit3=(as.numeric(unlabelled[3, "Cmic"])*as.numeric(unlabelled[3, "Cmicatm"])-mparl[["fr"]]*R_13Cinit3)/mparl[["fs"]]
       G_12Cinit3=as.numeric(labelled[3, "Glcorrected"])*(1-0.06296353)
       G_13Cinit3=as.numeric(labelled[3, "Glcorrected"])*0.06296353
       DOC_12Cinit3=as.numeric(unlabelled[3, "DOC2"])*(1-as.numeric(unlabelled[3, "DOCatm"]))
@@ -309,15 +280,15 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       #microbial biomass in replicate 1 and 4.
       R_12Cinit4=ipar[["Rinit"]]*(1-ipar[["Ratm_init"]])*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
       R_13Cinit4=ipar[["Rinit"]]*ipar[["Ratm_init"]]*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit4=(as.numeric(unlabelled[4, "Cmic"])*(1-as.numeric(unlabelled[4, "Cmicatm"]))-mpar[["fr"]]*R_12Cinit4)/mpar[["fs"]]
-      S_13Cinit4=(as.numeric(unlabelled[4, "Cmic"])*as.numeric(unlabelled[4, "Cmicatm"])-mpar[["fr"]]*R_13Cinit4)/mpar[["fs"]]
+      S_12Cinit4=(as.numeric(unlabelled[4, "Cmic"])*(1-as.numeric(unlabelled[4, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit4)/mparl[["fs"]]
+      S_13Cinit4=(as.numeric(unlabelled[4, "Cmic"])*as.numeric(unlabelled[4, "Cmicatm"])-mparl[["fr"]]*R_13Cinit4)/mparl[["fs"]]
       G_12Cinit4=as.numeric(labelled[4, "Glcorrected"])*(1-0.06296353)
       G_13Cinit4=as.numeric(labelled[4, "Glcorrected"])*0.06296353
       DOC_12Cinit4=as.numeric(unlabelled[4, "DOC2"])*(1-as.numeric(unlabelled[4, "DOCatm"]))
       DOC_13Cinit4=as.numeric(unlabelled[4, "DOC2"])*as.numeric(unlabelled[4, "DOCatm"])
       #Cres and CO2 pools are initialy 0
       
-      #8 model simulation is run. 4 simulations for unlabelled treatments and 4 for labelled tratments.
+      #8 model simulation is run. 4 simulations for unlabelled treatments ("db_modelun") and 4 for labelled tratments ("db_modell").
       #Thus, it is expected that the only difference between labelled and unlabelled tretaments is
       #the presence/absence of glucose as a source of organic carbon.
       #All model simulations are merged together. This has one big advantage - it increases the number
@@ -325,53 +296,49 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       #1. unlabelled treatments
       yhat_1un<-as.data.frame(ode(y=c(R_12C=R_12Cinit1, R_13C=R_13Cinit1,
                                       S_12C=S_12Cinit1, S_13C=S_13Cinit1,
-                                      G_12C=0, G_13C=0,
                                       DOC_12C=DOC_12Cinit1, DOC_13C=DOC_13Cinit1,
                                       Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                  parms=mparun, db_modelun, times=seq(0,50)))
       yhat_2un<-as.data.frame(ode(y=c(R_12C=R_12Cinit2, R_13C=R_13Cinit2,
                                       S_12C=S_12Cinit2, S_13C=S_13Cinit2,
-                                      G_12C=0, G_13C=0,
                                       DOC_12C=DOC_12Cinit2, DOC_13C=DOC_13Cinit2,
                                       Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                  parms=mparun, db_modelun, times=seq(0,50)))
       yhat_3un<-as.data.frame(ode(y=c(R_12C=R_12Cinit3, R_13C=R_13Cinit3,
                                       S_12C=S_12Cinit3, S_13C=S_13Cinit3,
-                                      G_12C=0, G_13C=0,
                                       DOC_12C=DOC_12Cinit3, DOC_13C=DOC_13Cinit3,
                                       Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                  parms=mparun, db_modelun, times=seq(0,50)))
       yhat_4un<-as.data.frame(ode(y=c(R_12C=R_12Cinit4, R_13C=R_13Cinit4,
                                       S_12C=S_12Cinit4, S_13C=S_13Cinit4,
-                                      G_12C=0, G_13C=0,
                                       DOC_12C=DOC_12Cinit4, DOC_13C=DOC_13Cinit4,
                                       Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                  parms=mparun, db_modelun, times=seq(0,50)))
       #2. labelled treatments
       yhat_1l<-as.data.frame(ode(y=c(R_12C=R_12Cinit1, R_13C=R_13Cinit1,
                                      S_12C=S_12Cinit1, S_13C=S_13Cinit1,
                                      G_12C=G_12Cinit1, G_13C=G_13Cinit1,
                                      DOC_12C=DOC_12Cinit1, DOC_13C=DOC_13Cinit1,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                 parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mparl, db_modell, times=seq(0,50)))
       yhat_2l<-as.data.frame(ode(y=c(R_12C=R_12Cinit2, R_13C=R_13Cinit2,
                                      S_12C=S_12Cinit2, S_13C=S_13Cinit2,
                                      G_12C=G_12Cinit2, G_13C=G_13Cinit2,
                                      DOC_12C=DOC_12Cinit2, DOC_13C=DOC_13Cinit2,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                 parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mparl, db_modell, times=seq(0,50)))
       yhat_3l<-as.data.frame(ode(y=c(R_12C=R_12Cinit3, R_13C=R_13Cinit3,
                                      S_12C=S_12Cinit3, S_13C=S_13Cinit3,
                                      G_12C=G_12Cinit3, G_13C=G_13Cinit3,
                                      DOC_12C=DOC_12Cinit3, DOC_13C=DOC_13Cinit3,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                 parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mparl, db_modell, times=seq(0,50)))
       yhat_4l<-as.data.frame(ode(y=c(R_12C=R_12Cinit4, R_13C=R_13Cinit4,
                                      S_12C=S_12Cinit4, S_13C=S_13Cinit4,
                                      G_12C=G_12Cinit4, G_13C=G_13Cinit4,
                                      DOC_12C=DOC_12Cinit4, DOC_13C=DOC_13Cinit4,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                 parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mparl, db_modell, times=seq(0,50)))
       #select only times 0 and 48 at which the measurements were done
       yhat_1un<-yhat_1un %>% filter(time==0 | time==48)
       yhat_2un<-yhat_2un %>% filter(time==0 | time==48)
@@ -382,54 +349,70 @@ testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpa
       yhat_3l<-yhat_3l %>% filter(time==0 | time==48)
       yhat_4l<-yhat_4l %>% filter(time==0 | time==48)
       
-      #combine all simulations together
-      yhat_all<-rbind(yhat_1un, yhat_2un, yhat_3un, yhat_4un,
-                      yhat_1l, yhat_2l, yhat_3l, yhat_4l)
+      #combine all unlabelled simulations together
+      yhat_allun<-rbind(yhat_1un, yhat_2un, yhat_3un, yhat_4un)
       #order them by time
-      yhat_all<-yhat_all[order(yhat_all$time), ]
+      yhat_allun<-yhat_allun[order(yhat_allun$time), ]
       
       #variables that were measured in the experiment are extracted
-      yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
+      yhatun<-select(yhat_allun, c("time", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
       
       #convert the simulated dataset into long format data frame
-      Yhat<-melt(yhat, id.vars = "time")
+      Yhatun<-melt(yhatun, id.vars = "time")
       
       #extract the relevant measurements from the dataset
-      obs<-data.frame(time = yhat$time, 
-                      G_12C = c(rep(0, times=4), as.numeric(labelled[c(1:4), "Glcorrected"])*(1-0.06296353),
-                                rep(0, times=4), as.numeric(labelled[c(5:8), "DOCg"])*(1-0.06296353)), 
-                      G_13C = c(rep(0, times=4), as.numeric(labelled[c(1:4), "Glcorrected"])*0.06296353,
-                                rep(0, times=4), as.numeric(labelled[c(5:8), "DOCg"])*0.06296353), 
-                      DOC_12C = c(as.numeric(unlabelled[c(1:4), "DOC2"])*(1-as.numeric(unlabelled[c(1:4), "DOCatm"])),
-                                  as.numeric(labelled[c(1:4), "DOC2"])*(1-as.numeric(labelled[c(1:4), "DOCatm"])),
-                                  as.numeric(unlabelled[c(5:8), "DOC2"])*(1-as.numeric(unlabelled[c(5:8), "DOCatm"])),
+      obsun<-data.frame(time = yhatun$time, 
+                       DOC_12C = c(as.numeric(unlabelled[c(1:4), "DOC2"])*(1-as.numeric(unlabelled[c(1:4), "DOCatm"])),
+                                   as.numeric(unlabelled[c(5:8), "DOC2"])*(1-as.numeric(unlabelled[c(5:8), "DOCatm"]))), 
+                       DOC_13C = c(as.numeric(unlabelled[c(1:4), "DOC2"])*as.numeric(unlabelled[c(1:4), "DOCatm"]),
+                                   as.numeric(unlabelled[c(5:8), "DOC2"])*as.numeric(unlabelled[c(5:8), "DOCatm"])), 
+                       CO2_12C = c(rep(0, times=4),
+                                   as.numeric(unlabelled[c(5:8), "CCO2c"])*(1-as.numeric(unlabelled[c(5:8), "CO2atm"]))), 
+                       CO2_13C = c(rep(0, times=4),
+                                   as.numeric(unlabelled[c(5:8), "CCO2c"])*as.numeric(unlabelled[c(5:8), "CO2atm"])), 
+                       Cmic_12C = c(as.numeric(unlabelled[c(1:4), "Cmic"])*(1-as.numeric(unlabelled[c(1:4), "Cmicatm"])),
+                                    as.numeric(unlabelled[c(5:8), "Cmic"])*(1-as.numeric(unlabelled[c(5:8), "Cmicatm"]))), 
+                       Cmic_13C = c(as.numeric(unlabelled[c(1:4), "Cmic"])*as.numeric(unlabelled[c(1:4), "Cmicatm"]),
+                                    as.numeric(unlabelled[c(5:8), "Cmic"])*as.numeric(unlabelled[c(5:8), "Cmicatm"])))
+      
+      #convert dataset with measurements to long format and copy the "value" column to Yhat data frame
+      Yhatun$obs<-melt(obsun, id.vars = "time")[, "value"]
+      
+      #combine all labelled simulations together
+      yhat_alll<-rbind(yhat_1l, yhat_2l, yhat_3l, yhat_4l)
+      #order them by time
+      yhat_alll<-yhat_alll[order(yhat_alll$time), ]
+      
+      #variables that were measured in the experiment are extracted
+      yhatl<-select(yhat_alll, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
+      
+      #convert the simulated dataset into long format data frame
+      Yhatl<-melt(yhatl, id.vars = "time")
+      
+      #extract the relevant measurements from the dataset
+      obsl<-data.frame(time = yhatl$time, 
+                      G_12C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*(1-0.06296353),
+                                as.numeric(labelled[c(5:8), "DOCg"])*(1-0.06296353)), 
+                      G_13C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*0.06296353,
+                                as.numeric(labelled[c(5:8), "DOCg"])*0.06296353), 
+                      DOC_12C = c(as.numeric(labelled[c(1:4), "DOC2"])*(1-as.numeric(labelled[c(1:4), "DOCatm"])),
                                   (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*(1-as.numeric(unlabelled[c(5:8), "DOCatm"]))), 
-                      DOC_13C = c(as.numeric(unlabelled[c(1:4), "DOC2"])*as.numeric(unlabelled[c(1:4), "DOCatm"]),
-                                  as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
-                                  as.numeric(unlabelled[c(5:8), "DOC2"])*as.numeric(unlabelled[c(5:8), "DOCatm"]),
+                      DOC_13C = c(as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
                                   (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*as.numeric(unlabelled[c(5:8), "DOCatm"])), 
-                      CO2_12C = c(rep(0, times=8),
-                                  as.numeric(unlabelled[c(5:8), "CCO2c"])*(1-as.numeric(unlabelled[c(5:8), "CO2atm"])),
+                      CO2_12C = c(rep(0, times=4),
                                   as.numeric(labelled[c(5:8), "CCO2c"])*(1-as.numeric(labelled[c(5:8), "CO2atm"]))), 
-                      CO2_13C = c(rep(0, times=8),
-                                  as.numeric(unlabelled[c(5:8), "CCO2c"])*as.numeric(unlabelled[c(5:8), "CO2atm"]),
+                      CO2_13C = c(rep(0, times=4),
                                   as.numeric(labelled[c(5:8), "CCO2c"])*as.numeric(labelled[c(5:8), "CO2atm"])), 
-                      Cmic_12C = c(as.numeric(unlabelled[c(1:4), "Cmic"])*(1-as.numeric(unlabelled[c(1:4), "Cmicatm"])),
-                                   as.numeric(labelled[c(1:4), "Cmic"])*(1-as.numeric(labelled[c(1:4), "Cmicatm"])),
-                                   as.numeric(unlabelled[c(5:8), "Cmic"])*(1-as.numeric(unlabelled[c(5:8), "Cmicatm"])),
+                      Cmic_12C = c(as.numeric(labelled[c(1:4), "Cmic"])*(1-as.numeric(labelled[c(1:4), "Cmicatm"])),
                                    as.numeric(labelled[c(5:8), "Cmic"])*(1-as.numeric(labelled[c(5:8), "Cmicatm"]))), 
-                      Cmic_13C = c(as.numeric(unlabelled[c(1:4), "Cmic"])*as.numeric(unlabelled[c(1:4), "Cmicatm"]),
-                                   as.numeric(labelled[c(1:4), "Cmic"])*as.numeric(labelled[c(1:4), "Cmicatm"]),
-                                   as.numeric(unlabelled[c(5:8), "Cmic"])*as.numeric(unlabelled[c(5:8), "Cmicatm"]),
+                      Cmic_13C = c(as.numeric(labelled[c(1:4), "Cmic"])*as.numeric(labelled[c(1:4), "Cmicatm"]),
                                    as.numeric(labelled[c(5:8), "Cmic"])*as.numeric(labelled[c(5:8), "Cmicatm"])))
       
       #convert dataset with measurements to long format and copy the "value" column to Yhat data frame
-      Yhat$obs<-melt(obs, id.vars = "time")[, "value"]
+      Yhatl$obs<-melt(obsl, id.vars = "time")[, "value"]
       
-      #remove glucose data from unlabelled treatments that contain only zeros
-      subset1<-(Yhat$variable == "G_12C" & Yhat$value==0)
-      subset2<-(Yhat$variable == "G_13C" & Yhat$value==0)
-      Yhat<-Yhat[(!subset1 & !subset2), ]
+      #merge all simulations together
+      Yhat<-rbind(Yhatun, Yhatl)
       
       #add the weighting factor
       #I want to have the weighting factor to be proportional to mean of the particular variables 
