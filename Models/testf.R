@@ -1,58 +1,168 @@
-DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpar){
+testf<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpar){
   #Some information that is needed for model simulations are pasted into the dataframe
   #1. Identification number of treatments
-  dataset$id<-rep(c(rep(seq(1:5), times=4),#O horizons - unlabelled
-                rep(seq(6:10), times=4),#A horizons - unlabelled
-                rep(seq(11:15), times=4),#O horizons - labelled
-                rep(seq(16:20), times=4)), times=2)#A horizons - labelled
-  #2. Estimated fractions of Reserves and Structures in chloroform labile organic carbon
-    #that are provided in "fractionsPL" and "fractionsCT" vectors entering the function
-  dataset$fr<-dataset$Plesne*fractionsPL[["fr"]]+dataset$Certovo*fractionsCT[["fr"]]
-  dataset$fs<-dataset$Plesne*fractionsPL[["fs"]]+dataset$Certovo*fractionsCT[["fs"]]
+  dataset$id<-rep(c(rep(seq(1, 5), times=4),#O horizons - unlabelled
+                    rep(seq(6, 10), times=4),#A horizons - unlabelled
+                    rep(seq(11, 15), times=4),#O horizons - labelled
+                    rep(seq(16, 20), times=4)), times=2)#A horizons - labelled
+  ###
+  m<-mixing
+  m$id<-rep(c(rep(seq(1, 5), times=4),#O horizons - unlabelled
+              rep(seq(6, 10), times=4),#A horizons - unlabelled
+              rep(seq(11, 15), times=4),#O horizons - labelled
+              rep(seq(16, 20), times=4)), times=2)#A horizons - labelled
+  ###
   
-  #model is defined here
-  db_model<-function(time, state, pars){
+  #2. Estimated fractions of Reserves and Structures in chloroform labile organic carbon
+  #that are provided in "fractionsPL" and "fractionsCT" vectors entering the function
+  dataset$fr<-as.numeric(dataset$Plesne)*fractionsPL[["fr"]]+as.numeric(dataset$Certovo)*fractionsCT[["fr"]]
+  dataset$fs<-as.numeric(dataset$Plesne)*fractionsPL[["fs"]]+as.numeric(dataset$Certovo)*fractionsCT[["fs"]]
+  
+  ###
+  m$fr<-as.numeric(m$Plesne)*fractionsPL[["fr"]]+as.numeric(m$Certovo)*fractionsCT[["fr"]]
+  m$fs<-as.numeric(m$Plesne)*fractionsPL[["fs"]]+as.numeric(m$Certovo)*fractionsCT[["fs"]]
+  ###
+  
+  #Two models are defined. The only difference between these models is presence/absence 
+  #of the glucose pool that is available for microbial consumption.
+  #db_modelun is used to simulate tretaments with no glucose addition and 
+  #db_modell is used to simulate tretaments with glucose addition 
+  #1. Without glucose addition
+  db_modelun<-function(time, state, pars){
     with(as.list(c(state, pars)),{
       #Abbreviations:
       #States:
-        #R_12C - 12C in Reserves
-        #R_13C - 13C in Reserves
-        #S_12C - 12C in Structures 
-        #S_13C - 13C in Structures 
-        #Cmic_12C - 12C chloroform labile organic carbon from microbial biomass 
-        #Cmic_13C - 13C chloroform labile organic carbon from microbial biomass
-        #G_12C - 12C glucose
-        #G_13C - 13C glucose
-        #DOC_12C - 12C dissolved organic carbon
-        #DOC_13C - 13C dissolved organic carbon
-        #Cres_12C - 12C in residual pool - unsoluble part of death cells
-        #Cres_13C - 13C in residual pool - unsoluble part of death cells
-        #CO2_12C - cumulative 12C-CO2 in headspace
-        #CO2_13C - cumulative 13C-CO2 in headspace
+      #R_12C - 12C in Reserves
+      #R_13C - 13C in Reserves
+      #S_12C - 12C in Structures 
+      #S_13C - 13C in Structures 
+      #Cmic_12C - 12C chloroform labile organic carbon from microbial biomass 
+      #Cmic_13C - 13C chloroform labile organic carbon from microbial biomass
+      #DOC_12C - 12C dissolved organic carbon
+      #DOC_13C - 13C dissolved organic carbon
+      #Cres_12C - 12C in residual pool - unsoluble part of death cells
+      #Cres_13C - 13C in residual pool - unsoluble part of death cells
+      #CO2_12C - cumulative 12C-CO2 in headspace
+      #CO2_13C - cumulative 13C-CO2 in headspace
       #Fluxes:
-        #Cu_glucose - uptake rate of the glucose
-        #Cu_DOC - uptake rate of the DOC
-        #m - maintnance rate of Structures 
-        #an - mobilization rate of Reserves available for growth
-        #r_12C - 12C-CO2 production rate
-        #r_13C - 13C-CO2 production rate
+      #Cu_DOC - uptake rate of the DOC
+      #m - maintnance rate of Structures 
+      #an - mobilization rate of Reserves available for growth
+      #r_12C - 12C-CO2 production rate
+      #r_13C - 13C-CO2 production rate
       #Scaling factors:
-        #Ratm - 13C atm% of Reserves pool
-        #Satm - 13C atm% of Structures pool
-        #Gatm - 13C atm% of glucose
-        #DOCatm - 13C atm% of dissolved organic carbon
+      #Ratm - 13C atm% of Reserves pool
+      #Satm - 13C atm% of Structures pool
+      #DOCatm - 13C atm% of dissolved organic carbon
       #Model parameters:
-        #Vmax_glucose - maximum velocity constant for glucose uptake rate
-        #Vmax_DOC - maximum velocity constant for dissolved organic carbon uptake rate
-        #Km_glucose - affinity constant of glucose uptake
-        #Km_DOC - affinity constant of dissolved organic carbon uptake
-        #Ac_glucose - assimilation efficiency of glucose
-        #Ac_DOC - assimilation efficiency of dissolved organic carbon
-        #mr - maintnance rate constant
-        #f - reserves mobilization rate constant
-        #Yu - growth yield 
-        #fr - chloroform labile part of Reserves
-        #fs - chloroform labile part of Structures
+      #Vmax_DOC - maximum velocity constant for dissolved organic carbon uptake rate
+      #Km_DOC - affinity constant of dissolved organic carbon uptake
+      #Ac_DOC - assimilation efficiency of dissolved organic carbon
+      #mr - maintnance rate constant
+      #f - reserves mobilization rate constant
+      #Yu - growth yield 
+      #fr - chloroform labile part of Reserves
+      #fs - chloroform labile part of Structures
+      
+      #Equations:
+      #Uptake rate
+      #Organic carbon uptake rate - DOC
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C))#
+      
+      #maintnance of Structures
+      m=mr*(S_12C+S_13C)
+      
+      #mobilization rate of Reserves available for growth
+      an=f*(R_12C+R_13C)-m
+      
+      #Scaling factors:
+      Ratm=R_13C/(R_12C+R_13C)
+      Satm=S_13C/(S_12C+S_13C)
+      DOCatm=DOC_13C/(DOC_12C+DOC_13C)
+      
+      #Respiration rate
+      #Respiration rate is composed of three processes - organic carbon assimilation associated respiration,
+      #growth associated respiration, and maintnance respiration.
+      #Growth associated respiration occur only when growth is realized.
+      #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
+      #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
+      #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
+      r_12C<-(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
+      r_13C<-(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      
+      #Chloroform labile organic carbon is part of Reserves and part of Structures
+      Cmic_12C=fr*R_12C+fs*S_12C
+      Cmic_13C=fr*R_13C+fs*S_13C
+      
+      #States
+      #If Reserves contain enough C, growth (i.e. Structures production) can be realized.
+      #In opposite case, Structures cannot increase.
+      #If C in Reserves is insufficient to cover maintnance of Structures (i.e. an is negative),
+      #respective amount of Structures are lost to DOC and Cres pool.
+      #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
+      dR_12C<-Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
+      dR_13C<-Ac_DOC*Cu_DOC*DOCatm-f*R_13C
+      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
+      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
+      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)
+      dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
+      dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
+      dCO2_12C<-r_12C
+      dCO2_13C<-r_13C
+      
+      return(list(c(dR_12C, dR_13C, 
+                    dS_12C, dS_13C, 
+                    dDOC_12C, dDOC_13C, 
+                    dCres_12C, dCres_13C,
+                    dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
+      
+    })
+  }
+  
+  #2. With glucose addition
+  db_modell<-function(time, state, pars){
+    with(as.list(c(state, pars)),{
+      #Abbreviations:
+      #States:
+      #R_12C - 12C in Reserves
+      #R_13C - 13C in Reserves
+      #S_12C - 12C in Structures 
+      #S_13C - 13C in Structures 
+      #Cmic_12C - 12C chloroform labile organic carbon from microbial biomass 
+      #Cmic_13C - 13C chloroform labile organic carbon from microbial biomass
+      #G_12C - 12C glucose
+      #G_13C - 13C glucose
+      #DOC_12C - 12C dissolved organic carbon
+      #DOC_13C - 13C dissolved organic carbon
+      #Cres_12C - 12C in residual pool - unsoluble part of death cells
+      #Cres_13C - 13C in residual pool - unsoluble part of death cells
+      #CO2_12C - cumulative 12C-CO2 in headspace
+      #CO2_13C - cumulative 13C-CO2 in headspace
+      #Fluxes:
+      #Cu_glucose - uptake rate of the glucose
+      #Cu_DOC - uptake rate of the DOC
+      #m - maintnance rate of Structures 
+      #an - mobilization rate of Reserves available for growth
+      #r_12C - 12C-CO2 production rate
+      #r_13C - 13C-CO2 production rate
+      #Scaling factors:
+      #Ratm - 13C atm% of Reserves pool
+      #Satm - 13C atm% of Structures pool
+      #Gatm - 13C atm% of glucose
+      #DOCatm - 13C atm% of dissolved organic carbon
+      #Model parameters:
+      #Vmax_glucose - maximum velocity constant for glucose uptake rate
+      #Vmax_DOC - maximum velocity constant for dissolved organic carbon uptake rate
+      #Km_glucose - affinity constant of glucose uptake
+      #Km_DOC - affinity constant of dissolved organic carbon uptake
+      #Ac_glucose - assimilation efficiency of glucose
+      #Ac_DOC - assimilation efficiency of dissolved organic carbon
+      #mr - maintnance rate constant
+      #f - reserves mobilization rate constant
+      #Yu - growth yield 
+      #fr - chloroform labile part of Reserves
+      #fs - chloroform labile part of Structures
       
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
@@ -127,6 +237,26 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
     
     #First, minimization ("cost") function is defined
     cost<-function(x){
+      
+      ###
+      unlabelled = m[m$id==1, ]
+      labelled = m[m$id==11, ]
+      
+      Rinit_guess=as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+      Ratm_init_guess=as.numeric(unlabelled[1, "Cmicatm"])
+      
+      mpar_guess<-c(as.numeric(unlabelled[1, "Plesne"])*initPL+as.numeric(unlabelled[1, "Certovo"])*initCT,
+                    0.1*Rinit_guess, Ratm_init_guess)
+      llimit<-c(as.numeric(minpars), 1e-3*Rinit_guess, 0.5*Ratm_init_guess)
+      ulimit<-c(as.numeric(maxpars), 0.95*Rinit_guess, 1.2*Ratm_init_guess)
+      
+      names(mpar_guess)<-parnames
+      names(llimit)<-parnames
+      names(ulimit)<-parnames
+      
+      par<-mpar_guess[1:length(parnames)]
+      ###
+      
       
       par<-x[1:length(parnames)]
       names(par)<-parnames
@@ -219,29 +349,29 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
                                   parms=mpar, db_model, times=seq(0,50)))
       #2. labelled treatments
       yhat_1l<-as.data.frame(ode(y=c(R_12C=R_12Cinit1, R_13C=R_13Cinit1,
-                                    S_12C=S_12Cinit1, S_13C=S_13Cinit1,
-                                    G_12C=G_12Cinit1, G_13C=G_13Cinit1,
-                                    DOC_12C=DOC_12Cinit1, DOC_13C=DOC_13Cinit1,
-                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                     S_12C=S_12Cinit1, S_13C=S_13Cinit1,
+                                     G_12C=G_12Cinit1, G_13C=G_13Cinit1,
+                                     DOC_12C=DOC_12Cinit1, DOC_13C=DOC_13Cinit1,
+                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
+                                 parms=mpar, db_model, times=seq(0,50)))
       yhat_2l<-as.data.frame(ode(y=c(R_12C=R_12Cinit2, R_13C=R_13Cinit2,
                                      S_12C=S_12Cinit2, S_13C=S_13Cinit2,
                                      G_12C=G_12Cinit2, G_13C=G_13Cinit2,
                                      DOC_12C=DOC_12Cinit2, DOC_13C=DOC_13Cinit2,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mpar, db_model, times=seq(0,50)))
       yhat_3l<-as.data.frame(ode(y=c(R_12C=R_12Cinit3, R_13C=R_13Cinit3,
                                      S_12C=S_12Cinit3, S_13C=S_13Cinit3,
                                      G_12C=G_12Cinit3, G_13C=G_13Cinit3,
                                      DOC_12C=DOC_12Cinit3, DOC_13C=DOC_13Cinit3,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mpar, db_model, times=seq(0,50)))
       yhat_4l<-as.data.frame(ode(y=c(R_12C=R_12Cinit4, R_13C=R_13Cinit4,
                                      S_12C=S_12Cinit4, S_13C=S_13Cinit4,
                                      G_12C=G_12Cinit4, G_13C=G_13Cinit4,
                                      DOC_12C=DOC_12Cinit4, DOC_13C=DOC_13Cinit4,
                                      Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                  parms=mpar, db_model, times=seq(0,50)))
+                                 parms=mpar, db_model, times=seq(0,50)))
       #select only times 0 and 48 at which the measurements were done
       yhat_1un<-yhat_1un %>% filter(time==0 | time==48)
       yhat_2un<-yhat_2un %>% filter(time==0 | time==48)
@@ -275,9 +405,9 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
                                   as.numeric(unlabelled[c(5:8), "DOC2"])*(1-as.numeric(unlabelled[c(5:8), "DOCatm"])),
                                   (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*(1-as.numeric(unlabelled[c(5:8), "DOCatm"]))), 
                       DOC_13C = c(as.numeric(unlabelled[c(1:4), "DOC2"])*as.numeric(unlabelled[c(1:4), "DOCatm"]),
-                                 as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
-                                 as.numeric(unlabelled[c(5:8), "DOC2"])*as.numeric(unlabelled[c(5:8), "DOCatm"]),
-                                 (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*as.numeric(unlabelled[c(5:8), "DOCatm"])), 
+                                  as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
+                                  as.numeric(unlabelled[c(5:8), "DOC2"])*as.numeric(unlabelled[c(5:8), "DOCatm"]),
+                                  (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*as.numeric(unlabelled[c(5:8), "DOCatm"])), 
                       CO2_12C = c(rep(0, times=8),
                                   as.numeric(unlabelled[c(5:8), "CCO2c"])*(1-as.numeric(unlabelled[c(5:8), "CO2atm"])),
                                   as.numeric(labelled[c(5:8), "CCO2c"])*(1-as.numeric(labelled[c(5:8), "CO2atm"]))), 
@@ -326,8 +456,8 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
     
     mpar_guess<-c(as.numeric(unlabelled[1, "Plesne"])*initPL+as.numeric(unlabelled[1, "Certovo"])*initCT,
                   0.1*Rinit_guess, Ratm_init_guess)
-    llimit<-c(as.numeric(minpar), 1e-3*Rinit_guess, 0.5*Ratm_init_guess)
-    ulimit<-c(as.numeric(maxpar), 0.95*Rinit_guess, 1.2*Ratm_init_guess)
+    llimit<-c(minpar, 1e-3*Rinit_guess, 0.5*Ratm_init_guess)
+    ulimit<-c(maxpar, 0.95*Rinit_guess, 1.2*Ratm_init_guess)
     
     names(mpar_guess)<-parnames
     names(llimit)<-parnames
@@ -347,7 +477,7 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
                      control = c(itermax = 10000, steptol = 50, reltol = 1e-8, 
                                  trace=FALSE, strategy=3, NP=250))
     out1<-list(mcmc_out=par_mcmc,
-                   pars=opt_par)
+               pars=opt_par)
     
     return(out1)
   }
@@ -356,112 +486,10 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
   epar_out<-foreach(i=seq(1:10), .combine=list, .multicombine = TRUE,
                     .packages=c("FME", "dplyr", "DEoptim", "reshape")) %dopar% {
                       
-                      epar(unlabelled = dataset[dataset$id==i, ],
-                           labelled = dataset[dataset$id==i+10, ])
+                      epar(unlabelled = dataset[dataset$id==1, ],
+                           labelled = dataset[dataset$id==11, ])
                       
                     }
   
-  #################################################################################################
-  #Goodness of model simulation is calculated here for each variable separately
-  #To do so, "good" function is defined. This function pretty much similar to "cost" function
-  good<-function(x){
-    
-    par<-x[1:length(parnames)]
-    names(par)<-parnames
-    
-    #Extracting initial concentration of state variables from data
-    #The initial abundance of Reserves and Strctures in microbial biomass is not know.
-    #Therefore initial concentration of Reserves ("Rinit") is estimated together with all model parameters.
-    #It is also not known if the Reserves and Structures have the same isotopic signal (i.e. Ratm/Satm).
-    #Therefore, one more parameter - Ratm_init, has to be defined and estimated.
-    R_12Cinit=par[["Rinit"]]*(1-par[["Ratm_init"]])
-    R_13Cinit=par[["Rinit"]]*par[["Ratm_init"]]
-    S_12Cinit=(as.numeric(dataset[1, "Cmic12init"])-par[["fr"]]*R_12Cinit)/par[["fs"]]
-    S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-par[["fr"]]*R_13Cinit)/par[["fs"]]
-    G_12Cinit=as.numeric(dataset[1, "G12init"])
-    G_13Cinit=as.numeric(dataset[1, "G13init"])
-    DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
-    DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
-    #Cres and CO2 pools are initialy 0
-    
-    #time of the sampling
-    t_sampling=as.numeric(dataset$time)
-    
-    #model simulation is run here
-    yhat_all<-as.data.frame(ode(y=c(R_12C=R_12Cinit, R_13C=R_13Cinit,
-                                    S_12C=S_12Cinit, S_13C=S_13Cinit,
-                                    G_12C=G_12Cinit, G_13C=G_13Cinit,
-                                    DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:11], db_model, times=t_sampling))
-    
-    #variables that were measured in the experiment are extracted
-    yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
-    
-    #convert the simulated dataset into long format data frame
-    Yhat<-melt(yhat, id.vars = "time")
-    
-    #add the measured data
-    Yhat$obs<-c(as.numeric(dataset[,"G12"]), as.numeric(dataset[,"G13"]),
-                as.numeric(dataset[,"WOC12"]), as.numeric(dataset[,"WOC13"]),
-                as.numeric(dataset[,"CO212"]), as.numeric(dataset[,"CO213"]),
-                as.numeric(dataset[,"Cmic12"]), as.numeric(dataset[,"Cmic13"]))
-    
-    #several goodness of fit metrics are calulated for each variable
-    #number of data points for each variable
-    n=length(t_sampling)
-    
-    Gfit<-Yhat %>% group_by(variable) %>% summarise(SSres=sum(((obs-value)^2), na.rm = T), 
-                                                    SStot=sum(((obs-mean(obs, na.rm = T))^2), na.rm = T),
-                                                    ll=-n*log(2*mean(obs, na.rm = T))/2-n*log(sd(obs, na.rm = T)^2)/2-sum(((obs-value)^2), na.rm = T)/2/(sd(obs, na.rm = T)^2))
-    Gfit$R2<-with(Gfit, 1-SSres/SStot)
-    Gfit$N<-length(x)
-    Gfit$AIC<-with(Gfit, 2*N-2*ll)
-    
-    rsq_out<-list(Yhat=Yhat, Gfit=Gfit)
-    
-    return(rsq_out)
-  }
-  
-  #The goodness of correspondence between model simulation and measured data is calculated 
-  #using "good" function here
-  fit<-good(opt_par$optim$bestmem)
-  
-  #For nice plots, model simulation is run with calibrated model parameters
-  #at fine temporal scale and the simulation is stored in "simul" data frame
-  #First, initial concentration of state variables are defined
-  R_12Cinit=opt_par$optim$bestmem[["Rinit"]]*(1-opt_par$optim$bestmem[["Ratm_init"]])
-  R_13Cinit=opt_par$optim$bestmem[["Rinit"]]*opt_par$optim$bestmem[["Ratm_init"]]
-  S_12Cinit=(as.numeric(dataset[1, "Cmic12init"])-opt_par$optim$bestmem[["fr"]]*R_12Cinit)/opt_par$optim$bestmem[["fs"]]
-  S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-opt_par$optim$bestmem[["fr"]]*R_13Cinit)/opt_par$optim$bestmem[["fs"]]
-  G_12Cinit=as.numeric(dataset[1, "G12init"])
-  G_13Cinit=as.numeric(dataset[1, "G13init"])
-  DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
-  DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
-  #Cres and CO2 pools are initialy 0
-  
-  #time of the sampling
-  t_simul=seq(from=min(dataset$time), to=max(dataset$time), length.out = 150)
-  
-  #model simulation is run here
-  simul<-as.data.frame(ode(y=c(R_12C=R_12Cinit, R_13C=R_13Cinit,
-                               S_12C=S_12Cinit, S_13C=S_13Cinit,
-                               G_12C=G_12Cinit, G_13C=G_13Cinit,
-                               DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                               Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=opt_par$optim$bestmem, db_model, times=t_simul))
-  Simul<-melt(simul, id.vars = "time")
-  
-  #All important calulations are stored in the "f_out" list and returned
-  #1. best model parameter
-  #2. goodness of correspondence
-  #3. MCMC output
-  #4. simulation
-  
-  f_out<-list(pars=opt_par$optim$bestmem,
-              goodness=fit,
-              par_mcmc=par_mcmc,
-              simul=Simul)
-  
-  return(f_out)
+  return(epar_out)
 }

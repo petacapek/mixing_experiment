@@ -118,11 +118,11 @@ CT_cal_deathK_D$goodness$Gfit
 ggplot(PL_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathK_D$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathK_D$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
-
+#Discrimination cannot explain the observed patterns. Therefore, it is not further considered
 
 #################################################################################################
 #################################################################################################
-##################################Model application##############################################
+#######################################Model application#########################################
 #################################################################################################
 #################################################################################################
 #Now, model is applied to understand the carbon mass balance in the mixing experiment
@@ -131,3 +131,26 @@ ggplot(CT_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_lin
 #Mean estimates of fr and fs parameters are used without acknowledging the possible variability (these parameters are fixed)
 #The rest of the parameters are estimated again but the lower and upper bounds of parameter
 #estimates are used to define the parameter space.
+
+#Measured data
+mixing<-read.csv("data_mixing.csv")[c(1:160), ]
+
+#Previously estimated parameters fr and fs
+fractionsPL<-PL_cal_deathK$pars[c(10,11)]
+fractionsCT<-CT_cal_deathK$pars[c(10,11)]
+
+#Initial guess of parameters Vmax_glucose - Yu
+initPL<-PL_cal_deathK$pars[c(1:9)]
+initCT<-CT_cal_deathK$pars[c(1:9)]
+
+#lower limits of parameter space
+minpars<-pmin(summary(PL_cal_deathK$par_mcmc)["min", c(1:9)],
+              summary(CT_cal_deathK$par_mcmc)["min", c(1:9)])
+maxpars<-pmax(summary(PL_cal_deathK$par_mcmc)["max", c(1:9)],
+              summary(CT_cal_deathK$par_mcmc)["max", c(1:9)])
+
+#loading the function
+source("./Models/testf.R")
+
+testf_out<-testf(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
+                 initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)

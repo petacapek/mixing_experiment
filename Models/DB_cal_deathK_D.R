@@ -1,5 +1,5 @@
 DB_cal_deathK_D<-function(dataset){
-  #this model accounts for isotope fractionation during carbon uptake
+  #this model accounts for isotope fractionation during growth
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -51,7 +51,7 @@ DB_cal_deathK_D<-function(dataset){
       #Organic carbon uptake rate - glucose
       Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -73,8 +73,8 @@ DB_cal_deathK_D<-function(dataset){
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
       #Kinetic fractionation is specified - we assume 13C discrimination 
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm+D)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm+D)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
-      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm-D)+(1-Ac_DOC)*Cu_DOC*(DOCatm-D)+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm+D), 0)+ifelse(an>0, m*(1-Ratm+D), f*(1-Ratm+D))
+      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm)+(1-Ac_DOC)*Cu_DOC*(DOCatm)+pmax((1-Yu)*an*(Ratm-D), 0)+ifelse(an>0, m*(Ratm-D), f*(Ratm-D))
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -86,14 +86,14 @@ DB_cal_deathK_D<-function(dataset){
       #If C in Reserves is insufficient to cover maintnance of Structures (i.e. an is negative),
       #respective amount of Structures are lost to DOC and Cres pool.
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
-      dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm+D)+Ac_DOC*Cu_DOC*(1-DOCatm+D)-f*R_12C
-      dR_13C<-Ac_glucose*Cu_glucose*(Gatm-D)+Ac_DOC*Cu_DOC*(DOCatm-D)-f*R_13C
-      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
-      dG_12C<--Cu_glucose*(1-Gatm+D)
-      dG_13C<--Cu_glucose*(Gatm-D)
-      dDOC_12C<--Cu_DOC*(1-DOCatm+D)-pmin(0, an/mr*(1-Satm)*fs)
-      dDOC_13C<--Cu_DOC*(DOCatm-D)-pmin(0, an/mr*Satm*fs)
+      dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*(1-Ratm+D)
+      dR_13C<-Ac_glucose*Cu_glucose*(Gatm)+Ac_DOC*Cu_DOC*(DOCatm)-f*(Ratm-D)
+      dS_12C<-pmax(an*Yu*(1-Ratm+D), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*Yu*(Ratm-D), 0)+pmin(0, an/mr*Satm)
+      dG_12C<--Cu_glucose*(1-Gatm)
+      dG_13C<--Cu_glucose*(Gatm)
+      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
+      dDOC_13C<--Cu_DOC*(DOCatm)-pmin(0, an/mr*Satm*fs)
       dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
       dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
       dCO2_12C<-r_12C
@@ -187,12 +187,12 @@ DB_cal_deathK_D<-function(dataset){
                     lower=c(Vmax_glucose=1e-4, Vmax_DOC=1e-4, 
                             Km_glucose=1e-4, Km_DOC=1e-4, 
                             Ac_glucose=0, Ac_DOC=0,
-                            mr=1e-8, f=1e-8, Yu=0, fr=0, fs=0, D=-5e-2,
+                            mr=1e-8, f=1e-8, Yu=0, fr=0, fs=0, D=-5e-4,
                             Rinit=1e-3*Rinit_guess, Ratm_init=0.5*Ratm_init_guess),
                     upper=c(Vmax_glucose=1e2, Vmax_DOC=1e2, 
                             Km_glucose=1e3, Km_DOC=1e3, 
                             Ac_glucose=1, Ac_DOC=1,
-                            mr=1e2, f=1e2, Yu=1, fr=1, fs=1, D=5e-2,
+                            mr=1e2, f=1e2, Yu=1, fr=1, fs=1, D=5e-4,
                             Rinit=0.95*Rinit_guess, Ratm_init=1.2*Ratm_init_guess), niter=10000)
   
   #lower and upper limits for parameters estimates are extracted
