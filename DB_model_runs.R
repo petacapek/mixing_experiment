@@ -150,29 +150,29 @@ maxpars<-pmax(summary(PL_cal_deathK$par_mcmc)["max", c(1:9)],
               summary(CT_cal_deathK$par_mcmc)["max", c(1:9)])
 
 #loading the testing function
-source("./Models/testf.R")
+# source("./Models/testf.R")
+# 
+# testf_out<-testf(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
+#                  initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
 
-testf_out<-testf(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
-                 initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
+#loading the function
+source("./Models/DB_mixing.R")
 
-# #loading the function
-# source("./Models/DB_mixing.R")
-# 
-# #defining number of cores
-# no_cors<-detectCores()
-# #creating cluster
-# cl<-makeCluster(no_cors)
-# #registering cluster
-# registerDoParallel(cl)
-# 
-# #function run
-# db_mixing_out<-DB_mixing(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
-#                          initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
-# 
-# stopImplicitCluster()
-# 
-# #checking the goodness of correspondence
-# db_mixing_out$goodness1
-# db_mixing_out$goodness2
-# db_mixing_out$goodness3
-# db_mixing_out$goodness4
+#defining number of cores
+no_cors<-detectCores()
+#creating cluster
+cl<-makeCluster(no_cors)
+#registering cluster
+registerDoParallel(cl)
+
+#function run
+db_mixing_out<-DB_mixing(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
+                        initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
+
+stopImplicitCluster()
+
+#checking the goodness of correspondence
+db_mixing_out$goodness1
+db_mixing_out$goodness2
+db_mixing_out$goodness3
+db_mixing_out$goodness4
