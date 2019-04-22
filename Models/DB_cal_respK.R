@@ -45,9 +45,9 @@ DB_cal_respK<-function(dataset){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)

@@ -156,9 +156,9 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -689,8 +689,8 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
                    rep(as.numeric(unlabelled$Plesne[1]), times = nrow(Yhatl)))
     Yhat$Certovo<-c(rep(as.numeric(unlabelled$Certovo[1]), times = nrow(Yhatun)),
                    rep(as.numeric(unlabelled$Certovo[1]), times = nrow(Yhatl)))
-    Yhat$horizon<-c(rep(as.character(unlabelled$horizon[1]), times = nrow(Yhatun)),
-                    rep(as.character(unlabelled$horizon[1]), times = nrow(Yhatl)))
+    Yhat$horizon<-c(rep(unlabelled$horizon[1], times = nrow(Yhatun)),
+                    rep(unlabelled$horizon[1], times = nrow(Yhatl)))
     Yhat$Treatment<-c(rep("Unlabelled", times = nrow(Yhatun)),
                       rep("Labelled", times = nrow(Yhatl)))
     
@@ -896,8 +896,8 @@ DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, m
                    rep(as.numeric(unlabelled$Plesne[1]), times = nrow(Yhatl)))
     Yhat$Certovo<-c(rep(as.numeric(unlabelled$Certovo[1]), times = nrow(Yhatun)),
                     rep(as.numeric(unlabelled$Certovo[1]), times = nrow(Yhatl)))
-    Yhat$horizon<-c(rep(as.character(unlabelled$horizon[1]), times = nrow(Yhatun)),
-                    rep(as.character(unlabelled$horizon[1]), times = nrow(Yhatl)))
+    Yhat$horizon<-c(rep(unlabelled$horizon[1], times = nrow(Yhatun)),
+                    rep(unlabelled$horizon[1], times = nrow(Yhatl)))
     Yhat$Treatment<-c(rep("Unlabelled", times = nrow(Yhatun)),
                       rep("Labelled", times = nrow(Yhatl)))
     return(Yhat)

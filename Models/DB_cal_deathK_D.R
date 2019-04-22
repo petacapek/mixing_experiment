@@ -49,9 +49,9 @@ DB_cal_deathK_D<-function(dataset){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/(Km_glucose+(G_12C+G_13C)*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(Km_DOC+(DOC_12C+DOC_13C)*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -60,7 +60,7 @@ DB_cal_deathK_D<-function(dataset){
       an=f*(R_12C+R_13C)-m
       
       #Scaling factors:
-      Ratm=R_13C/(R_12C+R_13C)
+      Ratm=R_13C/(R_12C+R_13C)-D
       Satm=S_13C/(S_12C+S_13C)
       Gatm=G_13C/(G_12C+G_13C)
       DOCatm=DOC_13C/(DOC_12C+DOC_13C)
@@ -73,8 +73,8 @@ DB_cal_deathK_D<-function(dataset){
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
       #Kinetic fractionation is specified - we assume 13C discrimination 
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm+D), 0)+ifelse(an>0, m*(1-Ratm+D), f*(1-Ratm+D))
-      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm)+(1-Ac_DOC)*Cu_DOC*(DOCatm)+pmax((1-Yu)*an*(Ratm-D), 0)+ifelse(an>0, m*(Ratm-D), f*(Ratm-D))
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*(1-Ratm))
+      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm)+(1-Ac_DOC)*Cu_DOC*(DOCatm)+pmax((1-Yu)*an*(Ratm), 0)+ifelse(an>0, m*(Ratm), f*(Ratm))
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -86,10 +86,10 @@ DB_cal_deathK_D<-function(dataset){
       #If C in Reserves is insufficient to cover maintnance of Structures (i.e. an is negative),
       #respective amount of Structures are lost to DOC and Cres pool.
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
-      dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*(1-Ratm+D)
-      dR_13C<-Ac_glucose*Cu_glucose*(Gatm)+Ac_DOC*Cu_DOC*(DOCatm)-f*(Ratm-D)
-      dS_12C<-pmax(an*Yu*(1-Ratm+D), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*Yu*(Ratm-D), 0)+pmin(0, an/mr*Satm)
+      dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*(1-Ratm)
+      dR_13C<-Ac_glucose*Cu_glucose*(Gatm)+Ac_DOC*Cu_DOC*(DOCatm)-f*(Ratm)
+      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*Yu*(Ratm), 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*(Gatm)
       dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
