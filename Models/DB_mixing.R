@@ -1,10 +1,10 @@
 DB_mixing<-function(dataset, fractionsPL, fractionsCT, initPL, initCT, minpar, maxpar){
   #Some information that is needed for model simulations are pasted into the dataframe
   #1. Identification number of treatments
-  dataset$id<-rep(c(rep(seq(1:5), times=4),#O horizons - unlabelled
-                rep(seq(6:10), times=4),#A horizons - unlabelled
-                rep(seq(11:15), times=4),#O horizons - labelled
-                rep(seq(16:20), times=4)), times=2)#A horizons - labelled
+  dataset$id<-rep(c(rep(seq(1,5), times=4),#O horizons - unlabelled
+                rep(seq(6,10), times=4),#A horizons - unlabelled
+                rep(seq(11,15), times=4),#O horizons - labelled
+                rep(seq(16,20), times=4)), times=2)#A horizons - labelled
   #2. Estimated fractions of Reserves and Structures in chloroform labile organic carbon
     #that are provided in "fractionsPL" and "fractionsCT" vectors entering the function
   dataset$fr<-dataset$Plesne*fractionsPL[["fr"]]+dataset$Certovo*fractionsCT[["fr"]]
