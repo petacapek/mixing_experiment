@@ -180,22 +180,22 @@ db_mixing_out$goodness4
 #The function cannot converge. Thus, litter horizons are run first separately as they seem to 
 #converge without the problem
 #loading the function
-source("./Models/DB_mixing_litter.R")
-
-#defining number of cores
-no_cors<-detectCores()-1
-#creating cluster
-cl<-makeCluster(no_cors)
-#registering cluster
-registerDoParallel(cl)
-
-#function run
-db_mixing_litter_out<-DB_mixing_litter(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
-                         initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
-
-stopImplicitCluster()
-
-#checking the goodness of correspondence
-db_mixing_litter_out$goodness1
-db_mixing_litter_out$goodness2
-
+# source("./Models/DB_mixing_litter.R")
+# 
+# #defining number of cores
+# no_cors<-detectCores()-1
+# #creating cluster
+# cl<-makeCluster(no_cors)
+# #registering cluster
+# registerDoParallel(cl)
+# 
+# #function run
+# db_mixing_litter_out<-DB_mixing_litter(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
+#                          initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
+# 
+# stopImplicitCluster()
+# 
+# #checking the goodness of correspondence
+# db_mixing_litter_out$goodness1
+# db_mixing_litter_out$goodness2
+# 
