@@ -177,25 +177,59 @@ db_mixing_out$goodness2
 db_mixing_out$goodness3
 db_mixing_out$goodness4
 
-#The function cannot converge. Thus, litter horizons are run first separately as they seem to 
-#converge without the problem
+#Plotting the correspondence
+ggplot(db_mixing_out$Yhat_treatments, aes(value, obs))+geom_point(aes(colour=horizon))+
+  facet_wrap(Treatment~variable, scales="free")+geom_abline(intercept=0, slope = 1)
+
+#Plotting the parameters
+##in long format
+Pars<-melt(db_mixing_out$pars_all, id.vars = c("Plesne", "Certovo", "horizon", "id"))
+##Add uncertainty
+Pars$sd<-melt(cbind(db_mixing_out$pars_all[, c("Plesne", "Certovo", "horizon", "id")],
+                    as.data.frame(rbind(summary(db_mixing_out$pars_raw[[1]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[2]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[3]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[4]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[5]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[6]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[7]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[8]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[9]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out$pars_raw[[10]]$mcmc_out)["sd", ]))), 
+      id.vars = c("Plesne", "Certovo", "horizon", "id"))[, "value"]
+
+ggplot(Pars, aes(Plesne, value))+geom_point(cex=6, aes(colour=horizon))+
+  geom_errorbar(aes(ymin=value-sd, ymax=value+sd, color=horizon))+
+  facet_wrap(horizon~variable, scales="free")
+
+#f parameter can be fixed across all treatments, but separate estimates are applied 
+#for litter and organic soil 
+mean(db_mixing_out$pars_all[db_mixing_out$pars_all$horizon=="Litter", "f"])
+mean(db_mixing_out$pars_all[db_mixing_out$pars_all$horizon=="Organic soil", "f"])
+
+########################################Fixing f parameter################################################
 #loading the function
-# source("./Models/DB_mixing_litter.R")
-# 
-# #defining number of cores
-# no_cors<-detectCores()-1
-# #creating cluster
-# cl<-makeCluster(no_cors)
-# #registering cluster
-# registerDoParallel(cl)
-# 
-# #function run
-# db_mixing_litter_out<-DB_mixing_litter(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
-#                          initPL = initPL, initCT = initCT, minpar=minpars, maxpar = maxpars)
-# 
-# stopImplicitCluster()
-# 
-# #checking the goodness of correspondence
-# db_mixing_litter_out$goodness1
-# db_mixing_litter_out$goodness2
-# 
+source("./Models/DB_mixing_f.R")
+
+#defining number of cores
+no_cors<-detectCores()
+#creating cluster
+cl<-makeCluster(no_cors)
+#registering cluster
+registerDoParallel(cl)
+
+#function run
+db_mixing_out_f<-DB_mixing_f(dataset=mixing, fractionsPL = fractionsPL, fractionsCT = fractionsCT,
+                             initPL = initPL[-8], initCT = initCT[-8], minpar=minpars[-8], maxpar = maxpars[-8])
+
+stopImplicitCluster()
+
+#checking the goodness of correspondence
+db_mixing_out_f$goodness1
+db_mixing_out_f$goodness2
+db_mixing_out_f$goodness3
+db_mixing_out_f$goodness4
+
+#Plotting the correspondence
+ggplot(db_mixing_out_f$Yhat_treatments, aes(value, obs))+geom_point(aes(colour=horizon))+
+  facet_wrap(Treatment~variable, scales="free")+geom_abline(intercept=0, slope = 1)

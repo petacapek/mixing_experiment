@@ -49,9 +49,9 @@ DB_cal_deathK_D<-function(dataset){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose=Vmax*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC=Vmax*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -60,7 +60,7 @@ DB_cal_deathK_D<-function(dataset){
       an=f*(R_12C+R_13C)-m
       
       #Scaling factors:
-      Ratm=R_13C/(R_12C+R_13C)-D
+      Ratm=R_13C/(R_12C+R_13C)
       Satm=S_13C/(S_12C+S_13C)
       Gatm=G_13C/(G_12C+G_13C)
       DOCatm=DOC_13C/(DOC_12C+DOC_13C)
@@ -73,8 +73,8 @@ DB_cal_deathK_D<-function(dataset){
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
       #Kinetic fractionation is specified - we assume 13C discrimination 
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*(1-Ratm))
-      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm)+(1-Ac_DOC)*Cu_DOC*(DOCatm)+pmax((1-Yu)*an*(Ratm), 0)+ifelse(an>0, m*(Ratm), f*(Ratm))
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm-D), 0)+ifelse(an>0, m*(1-Ratm), f*(1-Ratm))
+      r_13C<-(1-Ac_glucose)*Cu_glucose*(Gatm)+(1-Ac_DOC)*Cu_DOC*(DOCatm)+pmax((1-Yu)*an*(Ratm+D), 0)+ifelse(an>0, m*(Ratm), f*(Ratm))
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -88,8 +88,8 @@ DB_cal_deathK_D<-function(dataset){
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
       dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*(1-Ratm)
       dR_13C<-Ac_glucose*Cu_glucose*(Gatm)+Ac_DOC*Cu_DOC*(DOCatm)-f*(Ratm)
-      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*Yu*(Ratm), 0)+pmin(0, an/mr*Satm)
+      dS_12C<-pmax(an*Yu*(1-Ratm+D), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*Yu*(Ratm-D), 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*(Gatm)
       dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
@@ -109,10 +109,10 @@ DB_cal_deathK_D<-function(dataset){
     })
   }
   #define names of parameters
-  parnames<-c("Vmax_glucose", "Vmax_DOC", 
+  parnames<-c("Vmax", 
               "Km_glucose", "Km_DOC", 
-              "Ac_glucose", "Ac_DOC",
-              "mr", "f", "Yu", "fr", "fs", "D", "Rinit", "Ratm_init")
+              "Ac_glucose", "Ac_DOC", "D",
+              "mr", "f", "Yu", "fr", "fs", "Rinit", "Ratm_init")
   
   #Minimization ("cost") function is defined here
   cost<-function(x){
@@ -144,7 +144,7 @@ DB_cal_deathK_D<-function(dataset){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:12], db_model, times=t_sampling))
+                                parms=par[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -179,20 +179,20 @@ DB_cal_deathK_D<-function(dataset){
   Ratm_init_guess=as.numeric(dataset[1, "Cmic13init"])/(as.numeric(dataset[1, "Cmic12init"])+as.numeric(dataset[1, "Cmic13init"]))
   
   par_mcmc<-modMCMC(f=cost, 
-                    p=c(Vmax_glucose=0.1, Vmax_DOC=0.05, 
+                    p=c(Vmax=0.1,  
                         Km_glucose=10, Km_DOC=10, 
-                        Ac_glucose=0.9, Ac_DOC=0.8,
-                        mr=1e-4, f=1e-3, Yu=0.6, fr=0.8, fs=0.3, D=5e-6,
+                        Ac_glucose=0.9, Ac_DOC=0.8, D=1e-5,
+                        mr=1e-4, f=1e-3, Yu=0.6, fr=0.8, fs=0.3, 
                         Rinit=0.1*Rinit_guess, Ratm_init=Ratm_init_guess), 
-                    lower=c(Vmax_glucose=1e-4, Vmax_DOC=1e-4, 
+                    lower=c(Vmax=1e-4, 
                             Km_glucose=1e-4, Km_DOC=1e-4, 
-                            Ac_glucose=0, Ac_DOC=0,
-                            mr=1e-8, f=1e-8, Yu=0, fr=0, fs=0, D=-5e-4,
+                            Ac_glucose=0, Ac_DOC=0, D=1e-7,
+                            mr=1e-8, f=1e-8, Yu=0, fr=0, fs=0, 
                             Rinit=1e-3*Rinit_guess, Ratm_init=0.5*Ratm_init_guess),
-                    upper=c(Vmax_glucose=1e2, Vmax_DOC=1e2, 
+                    upper=c(Vmax=1e2, 
                             Km_glucose=1e3, Km_DOC=1e3, 
-                            Ac_glucose=1, Ac_DOC=1,
-                            mr=1e2, f=1e2, Yu=1, fr=1, fs=1, D=5e-4,
+                            Ac_glucose=1, Ac_DOC=1, D=1e-3,
+                            mr=1e2, f=1e2, Yu=1, fr=1, fs=1, 
                             Rinit=0.95*Rinit_guess, Ratm_init=1.2*Ratm_init_guess), niter=10000)
   
   #lower and upper limits for parameters estimates are extracted
@@ -236,7 +236,7 @@ DB_cal_deathK_D<-function(dataset){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:12], db_model, times=t_sampling))
+                                parms=par[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -292,7 +292,7 @@ DB_cal_deathK_D<-function(dataset){
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=opt_par$optim$bestmem[1:12], db_model, times=t_simul))
+                           parms=opt_par$optim$bestmem[1:11], db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned
