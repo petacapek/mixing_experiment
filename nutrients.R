@@ -249,8 +249,8 @@ ziv.zmeny$dDON<-mich2[81:160, "DON"]-mich2[1:80, "DON"]
 ziv.zmeny$dDON2<-mich2[81:160, "DON2"]-mich2[1:80, "DON2"]
 ziv.zmeny$dPO4<-mich2[81:160, "PO4"]-mich2[1:80, "PO4"]
 ziv.zmeny$dPO42<-mich2[81:160, "PO42"]-mich2[1:80, "PO42"]
-ziv.zmeny$CO2<-mich2[81:160, "C.CO2c"]
-ziv.zmeny$CO2s<-mich2[81:160, "C.CO2.s"]
+ziv.zmeny$CO2<-mich2[81:160, "CCO2c"]
+ziv.zmeny$CO2s<-mich2[81:160, "CCO2s"]
 ziv.zmeny$CUE<-mich2[81:160, "CUE"]
 
 ##DOC

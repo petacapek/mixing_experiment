@@ -55,6 +55,24 @@ CT_cal_deathK$goodness$Gfit
 
 ggplot(PL_cal_deathK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_deathK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_cal_death_py.R")
+#read the parameters
+py_parsPL <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters.csv", header = F))
+py_parsCT <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters.csv", header = F))
+
+PL_cal_py<-DB_cal_death_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                           py_pars = py_parsPL)
+CT_cal_py<-DB_cal_death_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                           py_pars = py_parsCT)
+
+PL_cal_py$goodness$Gfit
+CT_cal_py$goodness$Gfit
+
+ggplot(PL_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 
 #2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
 source("Models/DB_cal_respK.R")
@@ -178,7 +196,8 @@ db_mixing_out$goodness3
 db_mixing_out$goodness4
 
 #Plotting the correspondence
-ggplot(db_mixing_out$Yhat_treatments, aes(value, obs))+geom_point(aes(colour=horizon))+
+ggplot(db_mixing_out$Yhat_treatments[db_mixing_out$Yhat_treatments$horizon=="Litter", ], 
+       aes(value, obs))+geom_point(aes(colour=horizon))+
   facet_wrap(Treatment~variable, scales="free")+geom_abline(intercept=0, slope = 1)
 
 #Plotting the parameters
@@ -231,5 +250,36 @@ db_mixing_out_f$goodness3
 db_mixing_out_f$goodness4
 
 #Plotting the correspondence
-ggplot(db_mixing_out_f$Yhat_treatments, aes(value, obs))+geom_point(aes(colour=horizon))+
+ggplot(db_mixing_out_f$Yhat_treatments[db_mixing_out_f$Yhat_treatments$horizon=="Organic soil", ], 
+       aes(value, obs))+geom_point(aes(colour=horizon))+
   facet_wrap(Treatment~variable, scales="free")+geom_abline(intercept=0, slope = 1)
+
+#Plotting the parameters
+##in long format
+Pars_f<-melt(db_mixing_out_f$pars_all, id.vars = c("Plesne", "Certovo", "horizon", "id"))
+##Add uncertainty
+Pars_f$sd<-melt(cbind(db_mixing_out_f$pars_all[, c("Plesne", "Certovo", "horizon", "id")],
+                    as.data.frame(rbind(summary(db_mixing_out_f$pars_raw[[1]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[2]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[3]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[4]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[5]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[6]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[7]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[8]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[9]]$mcmc_out)["sd", ],
+                                        summary(db_mixing_out_f$pars_raw[[10]]$mcmc_out)["sd", ]))), 
+              id.vars = c("Plesne", "Certovo", "horizon", "id"))[, "value"]
+
+ggplot(Pars_f, aes(Plesne, value))+geom_point(cex=6, aes(colour=horizon))+
+  geom_errorbar(aes(ymin=value-sd, ymax=value+sd, color=horizon))+
+  facet_wrap(horizon~variable, scales="free")
+
+#Plotting the simulations
+Simul_f<-db_mixing_out_f$simul
+
+Simul_f %>% filter(horizon=="Organic soil" & variable=="Cmic_12C") %>% 
+  group_by(time, variable, Plesne, Certovo, Treatment) %>% 
+  summarize(value = mean(value)) %>%
+  ggplot(aes(time, value))+geom_line(aes(colour = Treatment))+
+  facet_wrap(variable~Plesne, scales="free")

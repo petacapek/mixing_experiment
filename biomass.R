@@ -19,7 +19,7 @@ ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(Pmic), y=mean(Pmic)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.67, 0.9))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.88))+
   ylab(expression(paste("Microbial biomass phosphorus ( ", mu, "mol ",g^{-1}, ")" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
@@ -36,7 +36,7 @@ ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(Cmic/Pmic), y=mean(Cmic/Pmic)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.67, 0.9),
+  facet_grid(znaceni~horizont)+theme_min+theme(legend.position = c(0.17, 0.88),
                                                               legend.key.size = unit(0.3, "in"))+
   ylab(expression(paste("Microbial C/P (mol/mol)" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
@@ -45,7 +45,7 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(Cmic
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(Nmic/Pmic), y=mean(Nmic/Pmic)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.35, 0.33),
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.88),
                                                               legend.key.size = unit(0.3, "in"),
                                                               legend.title = element_blank())+
   ylab(expression(paste("Microbial N/P (mol/mol)" )))+
