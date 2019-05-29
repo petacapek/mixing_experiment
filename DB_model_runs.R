@@ -12,7 +12,7 @@
 #uploads these functions from source files. 
 
 ###############################################################################################
-#required R labraries are uploaded
+#required R libraries are uploaded
 library(deSolve)
 library(dplyr)
 library(FME)
@@ -88,6 +88,24 @@ CT_cal_respK$goodness$Gfit
 ggplot(PL_cal_respK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_respK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_respK$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_respK$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_cal_resp_py.R")
+#read the parameters
+py_parsPL_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_resp.csv", header = F))
+py_parsCT_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_resp.csv", header = F))
+
+PL_cal_py_resp<-DB_cal_resp_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                           py_pars = py_parsPL_resp)
+CT_cal_py_resp<-DB_cal_resp_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                           py_pars = py_parsCT_resp)
+
+PL_cal_py_resp$goodness$Gfit
+CT_cal_py$goodness$Gfit
+
+ggplot(PL_cal_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 ###########################################Water extractable DOC##################################
 #1. Death model - When Structures cannot be maintained, Structures are dying and releasing to DOC and Cres pools
 source("Models/DB_cal_deathW.R")
@@ -137,6 +155,46 @@ ggplot(PL_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_lin
 ggplot(CT_cal_deathK_D$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathK_D$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
 #Discrimination cannot explain the observed patterns. Therefore, it is not further considered
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_cal_deathD_py.R")
+#read the parameters
+py_parsPLD <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parametersD.csv", header = F))
+py_parsCTD <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parametersD.csv", header = F))
+
+PL_calD_py<-DB_cal_deathD_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                           py_pars = py_parsPLD)
+CT_calD_py<-DB_cal_deathD_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                           py_pars = py_parsCTD)
+
+PL_calD_py$goodness$Gfit
+CT_calD_py$goodness$Gfit
+
+ggplot(PL_calD_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_calD_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_calD_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_calD_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+##################################Possible C sorption################################
+cal_data %>% filter(Status=="A") %>% group_by(Soil, time) %>% summarize(DOC = DOC12 + DOC13,
+                                                                        WOC = WOC12 + WOC13)
+mixing %>% group_by(Plesne, cas, znaceni, horizont) %>% summarize(DOC = mean(DOC2, na.rm=T),
+                                                                 WOC = mean(DOC, na.rm = T))
+
+source("Models/DB_cal_death_sorp_py.R")
+#read the parameters
+py_parsPL_sorp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_sorp.csv", header = F))
+py_parsCT_sorp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_sorp.csv", header = F))
+
+PL_cal_sorp_py<-DB_cal_death_sorp_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                             py_pars = py_parsPL_sorp)
+CT_cal_sorp_py<-DB_cal_death_sorp_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                             py_pars = py_parsCT_sorp)
+
+PL_cal_sorp_py$goodness$Gfit
+CT_cal_sorp_py$goodness$Gfit
+
+ggplot(PL_cal_sorp_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_sorp_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_sorp_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_sorp_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+
 
 #################################################################################################
 #################################################################################################

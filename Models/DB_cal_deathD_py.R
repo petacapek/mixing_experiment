@@ -1,4 +1,4 @@
-DB_cal_death_py<-function(dataset, py_pars){
+DB_cal_deathD_py<-function(dataset, py_pars){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -47,9 +47,9 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmaxg*(S_12C+S_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg)#
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose)#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km)#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC)#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -60,7 +60,7 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Scaling factors:
       Ratm=R_13C/(R_12C+R_13C)
       Satm=S_13C/(S_12C+S_13C)
-      Gatm=G_13C/(G_12C+G_13C)
+      Gatm=G_13C/(G_12C+G_13C)-D
       DOCatm=DOC_13C/(DOC_12C+DOC_13C)
       
       #Respiration rate
@@ -111,9 +111,9 @@ DB_cal_death_py<-function(dataset, py_pars){
   good<-function(x){
     
     par<-x
-    names(par)<-c("Ac_glucose", "Vmaxg", "Kmg", 
-                  "Ac_DOC", "Vmax", "Km",
-                  "mr", "f", "Yu", "fs", "fr", "Rinit")
+    names(par)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
+                  "Ac_DOC", "Vmax_DOC", "Km_DOC",
+                  "mr", "f", "Yu", "D", "fs", "fr", "Rinit")
     
     #Extracting initial concentration of state variables from data
     #The initial abundance of Reserves and Strctures in microbial biomass is not know.
@@ -141,7 +141,7 @@ DB_cal_death_py<-function(dataset, py_pars){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:11], db_model, times=t_sampling))
+                                parms=par[1:12], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -179,9 +179,9 @@ DB_cal_death_py<-function(dataset, py_pars){
   #at fine temporal scale and the simulation is stored in "simul" data frame
   #First, initial concentration of state variables are defined
   py_pars<-py_pars
-  names(py_pars)<-c("Ac_glucose", "Vmaxg", "Kmg", 
-                    "Ac_DOC", "Vmax", "Km",
-                    "mr", "f", "Yu", "fs", "fr", "Rinit")
+  names(py_pars)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
+                    "Ac_DOC", "Vmax_DOC", "Km_DOC",
+                    "mr", "f", "Yu", "D", "fs", "fr", "Rinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
                               (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
@@ -204,7 +204,7 @@ DB_cal_death_py<-function(dataset, py_pars){
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=py_pars[1:11], db_model, times=t_simul))
+                           parms=py_pars[1:12], db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned

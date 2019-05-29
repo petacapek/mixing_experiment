@@ -17,6 +17,15 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DOC2
   ylab(expression(paste(K[2],SO[4], " DOC ( ", mu, "mol ",g^{-1}, ")" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
+##DOC2/DOC
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((DOC2-DOC)/DOC2), y=mean((DOC2-DOC)/DOC2)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.9),
+                                                              legend.key.size = unit(0.3, "in"))+
+  ylab(expression(paste(K[2],SO[4], " DOC ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
 ##NH4
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(NH4), y=mean(NH4)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
@@ -29,6 +38,16 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(NH4)
 
 ##NH42
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(NH42), y=mean(NH42)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.85, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste(NH[4], " ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##NH42/NH4
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((NH42-NH4)/NH42), y=mean((NH42-NH4)/NH42)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
   facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.85, 0.9),
@@ -57,6 +76,16 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(NO32
   ylab(expression(paste(NO[3], " ( ", mu, "mol ",g^{-1}, ")" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
+##NO32-NO3
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((NO32-NO3)/NO32), y=mean((NO32-NO3)/NO32)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.85, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste(NO[3], " ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
 ##DON
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DON), y=mean(DON)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
@@ -76,6 +105,17 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DON2
                                                               legend.title = element_blank())+
   ylab(expression(paste(K[2], SO[4]~DON, " ( ", mu, "mol ",g^{-1}, ")" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+##DON2/DON
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((DON2-DON)/DON2), y=mean((DON2-DON)/DON2)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.18, 0.92),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste(K[2], SO[4]~DON, " ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+
 
 ##PO4
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(PO4), y=mean(PO4)) %>%
@@ -89,6 +129,16 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(PO4)
 
 ##PO42
 mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(PO42), y=mean(PO42)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste(NaHCO[3]~PO[4], " ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##PO42/PO4
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((PO42-PO4)/PO42), y=mean((PO42-PO4)/PO42)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
   facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.9),

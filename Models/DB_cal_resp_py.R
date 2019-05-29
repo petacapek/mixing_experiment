@@ -1,4 +1,4 @@
-DB_cal_death_py<-function(dataset, py_pars){
+DB_cal_resp_py<-function(dataset, py_pars){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -47,9 +47,9 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmaxg*(S_12C+S_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg)#
+      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose)#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km)#
+      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC)#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -70,8 +70,8 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
-      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C-an*(1-Satm))
+      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C-an*Satm)
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -85,14 +85,12 @@ DB_cal_death_py<-function(dataset, py_pars){
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
       dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
       dR_13C<-Ac_glucose*Cu_glucose*Gatm+Ac_DOC*Cu_DOC*DOCatm-f*R_13C
-      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
+      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an*(1-Satm))
+      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
-      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
-      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)
-      dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
-      dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
+      dDOC_12C<--Cu_DOC*(1-DOCatm)
+      dDOC_13C<--Cu_DOC*DOCatm
       dCO2_12C<-r_12C
       dCO2_13C<-r_13C
       
@@ -100,7 +98,6 @@ DB_cal_death_py<-function(dataset, py_pars){
                     dS_12C, dS_13C, 
                     dG_12C, dG_13C, 
                     dDOC_12C, dDOC_13C, 
-                    dCres_12C, dCres_13C,
                     dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
       
     })
@@ -111,8 +108,8 @@ DB_cal_death_py<-function(dataset, py_pars){
   good<-function(x){
     
     par<-x
-    names(par)<-c("Ac_glucose", "Vmaxg", "Kmg", 
-                  "Ac_DOC", "Vmax", "Km",
+    names(par)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
+                  "Ac_DOC", "Vmax_DOC", "Km_DOC",
                   "mr", "f", "Yu", "fs", "fr", "Rinit")
     
     #Extracting initial concentration of state variables from data
@@ -140,7 +137,7 @@ DB_cal_death_py<-function(dataset, py_pars){
                                     S_12C=S_12Cinit, S_13C=S_13Cinit,
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
+                                    CO2_12C=0, CO2_13C=0), 
                                 parms=par[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
@@ -179,8 +176,8 @@ DB_cal_death_py<-function(dataset, py_pars){
   #at fine temporal scale and the simulation is stored in "simul" data frame
   #First, initial concentration of state variables are defined
   py_pars<-py_pars
-  names(py_pars)<-c("Ac_glucose", "Vmaxg", "Kmg", 
-                    "Ac_DOC", "Vmax", "Km",
+  names(py_pars)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
+                    "Ac_DOC", "Vmax_DOC", "Km_DOC",
                     "mr", "f", "Yu", "fs", "fr", "Rinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
@@ -203,8 +200,8 @@ DB_cal_death_py<-function(dataset, py_pars){
                                S_12C=S_12Cinit, S_13C=S_13Cinit,
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                               Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=py_pars[1:11], db_model, times=t_simul))
+                               CO2_12C=0, CO2_13C=0),
+                           parms=py_pars, db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned

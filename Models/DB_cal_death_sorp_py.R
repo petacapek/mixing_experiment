@@ -1,4 +1,4 @@
-DB_cal_death_py<-function(dataset, py_pars){
+DB_cal_death_sorp_py<-function(dataset, py_pars){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -62,6 +62,7 @@ DB_cal_death_py<-function(dataset, py_pars){
       Satm=S_13C/(S_12C+S_13C)
       Gatm=G_13C/(G_12C+G_13C)
       DOCatm=DOC_13C/(DOC_12C+DOC_13C)
+      Qatm=Q13/(Q12+Q13)
       
       #Respiration rate
       #Respiration rate is composed of three processes - organic carbon assimilation associated respiration,
@@ -89,19 +90,24 @@ DB_cal_death_py<-function(dataset, py_pars){
       dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
-      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
-      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)
+      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)-
+        6*Kdes*(1-(Q12+Q13)/Qmax)*(DOC_12C+DOC_13C)*(1-DOCatm)+Kdes*((Q12+Q13)/Qmax)*(1-Qatm)
+      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)-
+        6*Kdes*(1-(Q12+Q13)/Qmax)*(DOC_12C+DOC_13C)*DOCatm+Kdes*((Q12+Q13)/Qmax)*Qatm
       dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
       dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
       dCO2_12C<-r_12C
       dCO2_13C<-r_13C
+      dQ12=6*Kdes*(1-(Q12+Q13)/Qmax)*(DOC_12C+DOC_13C)*(1-DOCatm)-Kdes*((Q12+Q13)/Qmax)*(1-Qatm)
+      dQ13=6*Kdes*(1-(Q12+Q13)/Qmax)*(DOC_12C+DOC_13C)*DOCatm-Kdes*((Q12+Q13)/Qmax)*Qatm
       
       return(list(c(dR_12C, dR_13C, 
                     dS_12C, dS_13C, 
                     dG_12C, dG_13C, 
                     dDOC_12C, dDOC_13C, 
                     dCres_12C, dCres_13C,
-                    dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
+                    dCO2_12C, dCO2_13C,
+                    dQ12, dQ13), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
       
     })
   }
@@ -113,7 +119,8 @@ DB_cal_death_py<-function(dataset, py_pars){
     par<-x
     names(par)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                   "Ac_DOC", "Vmax", "Km",
-                  "mr", "f", "Yu", "fs", "fr", "Rinit")
+                  "mr", "f", "Yu", "Qmax", "Kdes",
+                  "fs", "fr", "Rinit", "Qinit")
     
     #Extracting initial concentration of state variables from data
     #The initial abundance of Reserves and Strctures in microbial biomass is not know.
@@ -124,6 +131,10 @@ DB_cal_death_py<-function(dataset, py_pars){
                                 (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
     R_13Cinit=par[["Rinit"]]*(as.numeric(dataset[1, "Cmic13init"])/
                                                (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
+    Q_12Cinit=par[["Qinit"]]*(1-as.numeric(dataset[1, "DOC13init"])/
+                                (as.numeric(dataset[1, "DOC13init"])+as.numeric(dataset[1, "DOC12init"])))
+    Q_13Cinit=par[["Qinit"]]*(as.numeric(dataset[1, "DOC13init"])/
+                                (as.numeric(dataset[1, "DOC13init"])+as.numeric(dataset[1, "DOC12init"])))
     S_12Cinit=(as.numeric(dataset[1, "Cmic12init"])-par[["fr"]]*R_12Cinit)/par[["fs"]]
     S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-par[["fr"]]*R_13Cinit)/par[["fs"]]
     G_12Cinit=as.numeric(dataset[1, "G12init"])
@@ -140,8 +151,9 @@ DB_cal_death_py<-function(dataset, py_pars){
                                     S_12C=S_12Cinit, S_13C=S_13Cinit,
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:11], db_model, times=t_sampling))
+                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0,
+                                    Q12=Q_12Cinit, Q13=Q_13Cinit), 
+                                parms=par[1:13], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -181,12 +193,17 @@ DB_cal_death_py<-function(dataset, py_pars){
   py_pars<-py_pars
   names(py_pars)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                     "Ac_DOC", "Vmax", "Km",
-                    "mr", "f", "Yu", "fs", "fr", "Rinit")
+                    "mr", "f", "Yu", "Qmax", "Kdes",
+                    "fs", "fr", "Rinit", "Qinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
                               (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
   R_13Cinit=py_pars[["Rinit"]]*(as.numeric(dataset[1, "Cmic13init"])/
                                              (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
+  Q_12Cinit=par[["Qinit"]]*(1-as.numeric(dataset[1, "DOC13init"])/
+                              (as.numeric(dataset[1, "DOC13init"])+as.numeric(dataset[1, "DOC12init"])))
+  Q_13Cinit=par[["Qinit"]]*(as.numeric(dataset[1, "DOC13init"])/
+                              (as.numeric(dataset[1, "DOC13init"])+as.numeric(dataset[1, "DOC12init"])))
   S_12Cinit=(as.numeric(dataset[1, "Cmic12init"])-py_pars[["fr"]]*R_12Cinit)/py_pars[["fs"]]
   S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-py_pars[["fr"]]*R_13Cinit)/py_pars[["fs"]]
   G_12Cinit=as.numeric(dataset[1, "G12init"])
@@ -203,8 +220,9 @@ DB_cal_death_py<-function(dataset, py_pars){
                                S_12C=S_12Cinit, S_13C=S_13Cinit,
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                               Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=py_pars[1:11], db_model, times=t_simul))
+                               Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0,
+                               Q12=Q_12Cinit, Q13=Q_13Cinit),
+                           parms=py_pars[1:13], db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned

@@ -132,3 +132,72 @@ mich2[(mich2$cas==1 & mich2$znaceni=="Labelled"), ] %>% group_by(Plesne, horizon
                                         legend.title = element_blank())+
   ylab(expression(paste("Residual C (%)")))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##13C
+##CO2
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(CO2atm), y=mean(CO2atm)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.88),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste(CO[2]," (at%)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##DOC
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DOCatm), y=mean(DOCatm)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.88),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste("DOC (at%)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##Cmic
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(Cmicatm), y=mean(Cmicatm)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.88),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste("Cmic (at%)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+michizo<-mich2[, c("Plesne", "Certovo", "horizont", "Legend", "znaceni", "CO2atm",
+                   "DOCatm", "Cmicatm")]
+
+Michizo<-melt(michizo, id.vars = c("Plesne", "Certovo", "horizont", "Legend", "znaceni"))
+Michizo$delta<-with(Michizo, (value/(1-value)/0.011237-1)*1000)
+
+Michizo[-173, ] %>% filter(znaceni!="Labelled") %>%
+  group_by(Plesne, znaceni, horizont, Legend, variable) %>% summarize(y.sd=sd(delta), y=mean(delta)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(colour=Legend, shape=variable))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = "top",
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  ylab(expression(paste("Cmic (at%)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+Michizo[(Michizo$Plesne==0.5 & Michizo$znaceni=="Unlabelled" &
+           Michizo$horizont=="O" & Michizo$Legend=="Before incubation" &
+           Michizo$variable=="DOCatm"), ]
+
+#Zmena signalu biomasy a DOC
+ziv.zmeny$dDOCatm<-mich2[81:160, "DOCatm"]-mich2[1:80, "DOCatm"]
+
+ziv.zmeny %>% filter(znaceni=="Unlabelled") %>%
+  group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dDOCatm), y=mean(dDOCatm)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, pch=21, aes(fill=znaceni))+
+  facet_grid(.~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.2))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
+        legend.title = element_blank())+
+  ylab(expression(paste(Delta~DOC, " (atm%)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  geom_hline(yintercept = 0, lwd=1.5)+theme(legend.title = element_blank())
+
+ggplot(ziv.zmeny[ziv.zmeny$znaceni=="Unlabelled", ],
+       aes(dDOC2, dDOCatm))+geom_point(cex=6)+
+  facet_wrap(.~horizont, scales="free")
