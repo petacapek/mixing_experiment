@@ -56,6 +56,9 @@ mb.zmeny<-mich2[1:80, c("Plesne", "Certovo", "horizont", "znaceni")]
 mb.zmeny$dCmic<-mich2[81:160, "Cmic"]-mich2[1:80, "Cmic"]
 mb.zmeny$dNmic<-mich2[81:160, "Nmic"]-mich2[1:80, "Nmic"]
 mb.zmeny$dPmic<-mich2[81:160, "Pmic"]-mich2[1:80, "Pmic"]
+mb.zmeny$O2<-mich2[81:160, "O2"]
+mb.zmeny$CO2<-mich2[81:160, "CCO2c"]
+mb.zmeny$DOC_all<-mich2[1:80, "DOC"]+mich2[1:80, "Gl"]
 
 ##Cmic
 mb.zmeny %>% group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dCmic), y=mean(dCmic)) %>%
@@ -67,6 +70,21 @@ ggplot(aes(factor(Plesne), y))+geom_point(cex=6, pch=21, aes(fill=znaceni))+
   geom_hline(yintercept = 0, lwd=1.5)+theme(legend.position = c(0.15, 0.2),
                                             legend.key.size = unit(0.3, "in"),
                                             legend.title = element_blank())
+
+mb.zmeny %>% group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dCmic), y=mean(dCmic),
+                                                               x.sd=sd(O2), x=mean(O2)) %>%
+  ggplot(aes(x, y))+geom_point(cex=6, pch=21, aes(fill=znaceni))+
+  facet_wrap(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.2))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  geom_errorbarh(aes(xmin=x-x.sd, xmax=x+x.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(Delta, "Microbial biomass carbon ( ", mu, "mol ",g^{-1}, ")" )))+
+  xlab("Oxygen concentration (%)")+scale_fill_manual(values = c("white", "grey"))+
+  geom_hline(yintercept = 0, lwd=1.5)+theme(legend.position = c(0.15, 0.2),
+                                            legend.key.size = unit(0.3, "in"),
+                                            legend.title = element_blank())
+
+ggplot(mb.zmeny, aes(O2, dCmic*DOC_all))+geom_point(cex=6, pch=21, aes(fill=znaceni))+
+  facet_wrap(~horizont, scales="free")+theme_min
 
 ##Nmic
 mb.zmeny %>% group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dNmic), y=mean(dNmic)) %>%
