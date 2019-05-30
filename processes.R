@@ -186,6 +186,8 @@ Michizo[(Michizo$Plesne==0.5 & Michizo$znaceni=="Unlabelled" &
 
 #Zmena signalu biomasy a DOC
 ziv.zmeny$dDOCatm<-mich2[81:160, "DOCatm"]-mich2[1:80, "DOCatm"]
+ziv.zmeny$dCmicCO2atm<-mich2[81:160, "Cmicatm"]+mich2[81:160, "CO2atm"]
+ziv.zmeny$dCmic<-mb.zmeny$dCmic
 
 ziv.zmeny %>% filter(znaceni=="Unlabelled") %>%
   group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dDOCatm), y=mean(dDOCatm)) %>%
@@ -198,6 +200,6 @@ ziv.zmeny %>% filter(znaceni=="Unlabelled") %>%
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
   geom_hline(yintercept = 0, lwd=1.5)+theme(legend.title = element_blank())
 
-ggplot(ziv.zmeny[ziv.zmeny$znaceni=="Unlabelled", ],
-       aes(dDOC2, dDOCatm))+geom_point(cex=6)+
+ggplot(ziv.zmeny[(ziv.zmeny$znaceni=="Unlabelled" & ziv.zmeny$horizont=="O"), ],
+       aes(dCmic, ((dCmicCO2atm/(1-dCmicCO2atm))/0.011237-1)*1000))+geom_point(cex=6)#+
   facet_wrap(.~horizont, scales="free")
