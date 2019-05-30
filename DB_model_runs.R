@@ -128,9 +128,9 @@ py_parsPLW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parametersW.csv
 py_parsCTW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parametersW.csv", header = F))
 
 PL_W_py<-DB_W_death_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
-                           py_pars = py_parsPL)
+                           py_pars = py_parsPLW)
 CT_W_py<-DB_W_death_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
-                           py_pars = py_parsCT)
+                           py_pars = py_parsCTW)
 
 PL_W_py$goodness$Gfit
 CT_W_py$goodness$Gfit
@@ -156,13 +156,13 @@ ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(da
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 source("Models/DB_W_resp_py.R")
 #read the parameters
-py_parsPL_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_respW.csv", header = F))
-py_parsCT_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_respW.csv", header = F))
+py_parsPL_respW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_respW.csv", header = F))
+py_parsCT_respW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_respW.csv", header = F))
 
 PL_W_py_resp<-DB_W_resp_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
-                               py_pars = py_parsPL_resp)
+                               py_pars = py_parsPL_respW)
 CT_W_py_resp<-DB_W_resp_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
-                               py_pars = py_parsCT_resp)
+                               py_pars = py_parsCT_respW)
 
 PL_W_py_resp$goodness$Gfit
 CT_W_py_resp$goodness$Gfit

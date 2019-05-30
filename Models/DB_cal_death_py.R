@@ -70,8 +70,8 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-0.8)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
-      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-0.8)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-0.9)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
+      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-0.9)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -85,8 +85,8 @@ DB_cal_death_py<-function(dataset, py_pars){
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
       dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
       dR_13C<-Ac_glucose*Cu_glucose*Gatm+Ac_DOC*Cu_DOC*DOCatm-f*R_13C
-      dS_12C<-pmax(an*0.8*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*0.8*Ratm, 0)+pmin(0, an/mr*Satm)
+      dS_12C<-pmax(an*0.9*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*0.9*Ratm, 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
       dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
