@@ -1,4 +1,4 @@
-DB_cal_resp_py<-function(dataset, py_pars){
+DB_W_death_py<-function(dataset, py_pars){
   
   #model is defined here
   db_model<-function(time, state, pars){
@@ -47,9 +47,9 @@ DB_cal_resp_py<-function(dataset, py_pars){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose=Vmaxg*(S_12C+S_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC=Vmax*(S_12C+S_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
       
       #maintnance of Structures
       m=mr*(S_12C+S_13C)
@@ -70,8 +70,8 @@ DB_cal_resp_py<-function(dataset, py_pars){
       #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-0.8)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C-an*(1-Satm))
-      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-0.8)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C-an*Satm)
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-0.8)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
+      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-0.8)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -85,12 +85,14 @@ DB_cal_resp_py<-function(dataset, py_pars){
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
       dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
       dR_13C<-Ac_glucose*Cu_glucose*Gatm+Ac_DOC*Cu_DOC*DOCatm-f*R_13C
-      dS_12C<-pmax(an*0.8*(1-Ratm), 0)+pmin(0, an*(1-Satm))
-      dS_13C<-pmax(an*0.8*Ratm, 0)+pmin(0, an*Satm)
+      dS_12C<-pmax(an*0.8*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*0.8*Ratm, 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
-      dDOC_12C<--Cu_DOC*(1-DOCatm)
-      dDOC_13C<--Cu_DOC*DOCatm
+      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
+      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)
+      dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
+      dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
       dCO2_12C<-r_12C
       dCO2_13C<-r_13C
       
@@ -98,6 +100,7 @@ DB_cal_resp_py<-function(dataset, py_pars){
                     dS_12C, dS_13C, 
                     dG_12C, dG_13C, 
                     dDOC_12C, dDOC_13C, 
+                    dCres_12C, dCres_13C,
                     dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
       
     })
@@ -108,8 +111,8 @@ DB_cal_resp_py<-function(dataset, py_pars){
   good<-function(x){
     
     par<-x
-    names(par)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
-                  "Ac_DOC", "Vmax_DOC", "Km_DOC",
+    names(par)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+                  "Ac_DOC", "Vmax", "Km",
                   "mr", "f", "fs", "fr", "Rinit")
     
     #Extracting initial concentration of state variables from data
@@ -125,8 +128,8 @@ DB_cal_resp_py<-function(dataset, py_pars){
     S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-par[["fr"]]*R_13Cinit)/par[["fs"]]
     G_12Cinit=as.numeric(dataset[1, "G12init"])
     G_13Cinit=as.numeric(dataset[1, "G13init"])
-    DOC_12Cinit=as.numeric(dataset[1, "DOC12init"])
-    DOC_13Cinit=as.numeric(dataset[1, "DOC13init"])
+    DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
+    DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
     #Cres and CO2 pools are initialy 0
     
     #time of the sampling
@@ -137,7 +140,7 @@ DB_cal_resp_py<-function(dataset, py_pars){
                                     S_12C=S_12Cinit, S_13C=S_13Cinit,
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                                    CO2_12C=0, CO2_13C=0), 
+                                    Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
                                 parms=par[1:10], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
@@ -148,7 +151,7 @@ DB_cal_resp_py<-function(dataset, py_pars){
     
     #add the measured data
     Yhat$obs<-c(as.numeric(dataset[,"G12"]), as.numeric(dataset[,"G13"]),
-                as.numeric(dataset[,"DOC12"]), as.numeric(dataset[,"DOC13"]),
+                as.numeric(dataset[,"WOC12"]), as.numeric(dataset[,"WOC13"]),
                 as.numeric(dataset[,"CO212"]), as.numeric(dataset[,"CO213"]),
                 as.numeric(dataset[,"Cmic12"]), as.numeric(dataset[,"Cmic13"]))
     
@@ -176,8 +179,8 @@ DB_cal_resp_py<-function(dataset, py_pars){
   #at fine temporal scale and the simulation is stored in "simul" data frame
   #First, initial concentration of state variables are defined
   py_pars<-py_pars
-  names(py_pars)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
-                    "Ac_DOC", "Vmax_DOC", "Km_DOC",
+  names(py_pars)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+                    "Ac_DOC", "Vmax", "Km",
                     "mr", "f", "fs", "fr", "Rinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
@@ -188,8 +191,8 @@ DB_cal_resp_py<-function(dataset, py_pars){
   S_13Cinit=(as.numeric(dataset[1, "Cmic13init"])-py_pars[["fr"]]*R_13Cinit)/py_pars[["fs"]]
   G_12Cinit=as.numeric(dataset[1, "G12init"])
   G_13Cinit=as.numeric(dataset[1, "G13init"])
-  DOC_12Cinit=as.numeric(dataset[1, "DOC12init"])
-  DOC_13Cinit=as.numeric(dataset[1, "DOC13init"])
+  DOC_12Cinit=as.numeric(dataset[1, "WOC12init"])
+  DOC_13Cinit=as.numeric(dataset[1, "WOC13init"])
   #Cres and CO2 pools are initialy 0
   
   #time of the sampling
@@ -200,7 +203,7 @@ DB_cal_resp_py<-function(dataset, py_pars){
                                S_12C=S_12Cinit, S_13C=S_13Cinit,
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
-                               CO2_12C=0, CO2_13C=0),
+                               Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
                            parms=py_pars[1:10], db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   

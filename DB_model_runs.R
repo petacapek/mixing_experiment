@@ -100,7 +100,7 @@ CT_cal_py_resp<-DB_cal_resp_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_dat
                            py_pars = py_parsCT_resp)
 
 PL_cal_py_resp$goodness$Gfit
-CT_cal_py$goodness$Gfit
+CT_cal_py_resp$goodness$Gfit
 
 ggplot(PL_cal_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
@@ -121,6 +121,24 @@ CT_cal_deathW$goodness$Gfit
 ggplot(PL_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_deathW$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_deathW$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_deathW$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_W_death_py.R")
+#read the parameters
+py_parsPLW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parametersW.csv", header = F))
+py_parsCTW <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parametersW.csv", header = F))
+
+PL_W_py<-DB_W_death_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                           py_pars = py_parsPL)
+CT_W_py<-DB_W_death_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                           py_pars = py_parsCT)
+
+PL_W_py$goodness$Gfit
+CT_W_py$goodness$Gfit
+
+ggplot(PL_W_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_W_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_W_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_W_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 #2. Respiration model - When Structures cannot be maintained, Structures are released as CO2 
 source("Models/DB_cal_respW.R")
 PL_cal_respW<-DB_cal_respW(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ])
@@ -134,6 +152,24 @@ CT_cal_respW$goodness$Gfit
 
 ggplot(PL_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_W_resp_py.R")
+#read the parameters
+py_parsPL_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_respW.csv", header = F))
+py_parsCT_resp <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_respW.csv", header = F))
+
+PL_W_py_resp<-DB_W_resp_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                               py_pars = py_parsPL_resp)
+CT_W_py_resp<-DB_W_resp_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                               py_pars = py_parsCT_resp)
+
+PL_W_py_resp$goodness$Gfit
+CT_W_py_resp$goodness$Gfit
+
+ggplot(PL_W_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_W_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_W_py_resp$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_W_py_resp$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
 ##################################Possible isotope discrimination################################
