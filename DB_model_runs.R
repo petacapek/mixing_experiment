@@ -71,6 +71,18 @@ CT_cal_py$goodness$Gfit
 
 ggplot(PL_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
+#Marstorp 1999
+source("Models/DB_M_death_py.R")
+Mdata<-read.csv("./DB_concept/Marstorp/marstorp1999.csv")
+py_parsM <- as.numeric(read.csv("./DB_concept/Marstorp/M_parameters.csv", header = F))
+
+M_py<-DB_M_death_py(dataset = Mdata, py_pars = py_parsM)
+
+M_py$goodness$Gfit
+
+ggplot(M_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=M_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(Mdata, aes(Time, CLC))+geom_point(cex=6)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
@@ -207,6 +219,24 @@ CT_calD_py$goodness$Gfit
 
 ggplot(PL_calD_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_calD_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_calD_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_calD_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#Respiratory losses
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Python parameters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+source("Models/DB_cal_respD_py.R")
+#read the parameters
+py_parsPLD2 <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parameters_respD2.csv", header = F))
+py_parsCTD2 <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parameters_respD2.csv", header = F))
+
+PL_calD2_py<-DB_cal_respD_py(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                             py_pars = py_parsPLD2)
+CT_calD2_py<-DB_cal_respD_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                             py_pars = py_parsCTD2)
+
+PL_calD2_py$goodness$Gfit
+CT_calD2_py$goodness$Gfit
+
+ggplot(PL_calD2_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_calD2_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_calD2_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_calD2_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 ##################################Possible C sorption################################
 cal_data %>% filter(Status=="A") %>% group_by(Soil, time) %>% summarize(DOC = DOC12 + DOC13,
@@ -377,3 +407,34 @@ Simul_f %>% filter(horizon=="Organic soil" & variable=="Cmic_12C") %>%
   summarize(value = mean(value)) %>%
   ggplot(aes(time, value))+geom_line(aes(colour = Treatment))+
   facet_wrap(variable~Plesne, scales="free")
+
+######################################Organic soil only#######################################
+#Use model parameters from calibration phase - same soils
+#Difference is theoretically given by the initial amount of Reserves
+names(py_parsPL)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+                    "Ac_DOC", "Vmax", "Km",
+                    "mr", "f", "Yu", "fs", "fr", "Rinit")
+names(py_parsCT)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+                    "Ac_DOC", "Vmax", "Km",
+                    "mr", "f", "Yu", "fs", "fr", "Rinit")
+
+#loading the function
+source("./Models/DB_mixing_organic.R")
+
+#defining number of cores
+no_cors<-detectCores()-2
+#creating cluster
+cl<-makeCluster(no_cors)
+#registering cluster
+registerDoParallel(cl)
+
+#function run
+db_mixing_organic<-DB_mixing_organic(dataset=mixing, initPL = py_parsPL, initCT = py_parsCT)
+
+stopImplicitCluster()
+
+#checking the goodness of correspondence
+db_mixing_organic$goodness1
+db_mixing_organic$goodness2
+db_mixing_organic$goodness3
+db_mixing_organic$goodness4

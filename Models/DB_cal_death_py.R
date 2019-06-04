@@ -70,8 +70,8 @@ DB_cal_death_py<-function(dataset, py_pars){
       #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-0.9)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
-      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-0.9)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
+      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -85,8 +85,8 @@ DB_cal_death_py<-function(dataset, py_pars){
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
       dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
       dR_13C<-Ac_glucose*Cu_glucose*Gatm+Ac_DOC*Cu_DOC*DOCatm-f*R_13C
-      dS_12C<-pmax(an*0.9*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*0.9*Ratm, 0)+pmin(0, an/mr*Satm)
+      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
+      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
       dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
@@ -113,7 +113,7 @@ DB_cal_death_py<-function(dataset, py_pars){
     par<-x
     names(par)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                   "Ac_DOC", "Vmax", "Km",
-                  "mr", "f", "fs", "fr", "Rinit")
+                  "mr", "f", "Yu", "fs", "fr", "Rinit")
     
     #Extracting initial concentration of state variables from data
     #The initial abundance of Reserves and Strctures in microbial biomass is not know.
@@ -141,7 +141,7 @@ DB_cal_death_py<-function(dataset, py_pars){
                                     G_12C=G_12Cinit, G_13C=G_13Cinit,
                                     DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                     Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0), 
-                                parms=par[1:10], db_model, times=t_sampling))
+                                parms=par[1:11], db_model, times=t_sampling))
     
     #variables that were measured in the experiment are extracted
     yhat<-select(yhat_all, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
@@ -181,7 +181,7 @@ DB_cal_death_py<-function(dataset, py_pars){
   py_pars<-py_pars
   names(py_pars)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                     "Ac_DOC", "Vmax", "Km",
-                    "mr", "f", "fs", "fr", "Rinit")
+                    "mr", "f", "Yu", "fs", "fr", "Rinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
                               (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
@@ -204,7 +204,7 @@ DB_cal_death_py<-function(dataset, py_pars){
                                G_12C=G_12Cinit, G_13C=G_13Cinit,
                                DOC_12C=DOC_12Cinit, DOC_13C=DOC_13Cinit,
                                Cres_12C=0, Cres_13C=0, CO2_12C=0, CO2_13C=0),
-                           parms=py_pars[1:10], db_model, times=t_simul))
+                           parms=py_pars[1:11], db_model, times=t_simul))
   Simul<-melt(simul, id.vars = "time")
   
   #All important calulations are stored in the "f_out" list and returned

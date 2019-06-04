@@ -47,21 +47,19 @@ DB_cal_deathD_py<-function(dataset, py_pars){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=Vmax_glucose*(S_12C+S_13C)*(G_12C+G_13C)/((G_12C+G_13C)+Km_glucose)#
+      Cu_glucose12=Vmax_glucose*(S_12C+S_13C)*G_12C/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
+      Cu_glucose13=Vmax_glucose*(S_12C+S_13C)*G_13C/((G_12C+G_13C)+Km_glucose*(1+(DOC_12C+DOC_13C)/Km_DOC))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=Vmax_DOC*(S_12C+S_13C)*(DOC_12C+DOC_13C)/((DOC_12C+DOC_13C)+Km_DOC)#
+      Cu_DOC12=Vmax_DOC*(S_12C+S_13C)*DOC_12C/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
+      Cu_DOC13=Vmax_DOC*(S_12C+S_13C)*DOC_13C/((DOC_12C+DOC_13C)+Km_DOC*(1+(G_12C+G_13C)/Km_glucose))#
       
       #maintnance of Structures
-      m=mr*(S_12C+S_13C)
+      m12=mr*S_12C
+      m13=mr*S_13C
       
       #mobilization rate of Reserves available for growth
-      an=f*(R_12C+R_13C)-m
-      
-      #Scaling factors:
-      Ratm=R_13C/(R_12C+R_13C)
-      Satm=S_13C/(S_12C+S_13C)
-      Gatm=G_13C/(G_12C+G_13C)-D
-      DOCatm=DOC_13C/(DOC_12C+DOC_13C)
+      an12=f*R_12C-m12
+      an13=(1+D)*f*R_13C-m13
       
       #Respiration rate
       #Respiration rate is composed of three processes - organic carbon assimilation associated respiration,
@@ -70,8 +68,8 @@ DB_cal_deathD_py<-function(dataset, py_pars){
       #Maintnance respiration is defined by the concentration of Structures, but at the same time, mobilization rate of Reserves.
       #When an is negative, all C mobilized from pool of Reserves are respired, which doesn't need to correspond with 
       #the maintnance requirements. In that case, maintnance respiration is lower than it should be and Structers are dying.
-      r_12C<-(1-Ac_glucose)*Cu_glucose*(1-Gatm)+(1-Ac_DOC)*Cu_DOC*(1-DOCatm)+pmax((1-Yu)*an*(1-Ratm), 0)+ifelse(an>0, m*(1-Ratm), f*R_12C)
-      r_13C<-(1-Ac_glucose)*Cu_glucose*Gatm+(1-Ac_DOC)*Cu_DOC*DOCatm+pmax((1-Yu)*an*Ratm, 0)+ifelse(an>0, m*Ratm, f*R_13C)
+      r_12C<-(1-Ac_glucose)*Cu_glucose12+(1-Ac_DOC)*Cu_DOC12+pmax((1-Yu)*an12, 0)+ifelse(an12>0, m12, f*R_12C)
+      r_13C<-(1-Ac_glucose)*Cu_glucose13+(1-Ac_DOC)*Cu_DOC13+pmax((1-Yu)*an13, 0)+ifelse(an13>0, m13, (1+D)*f*R_13C)
       
       #Chloroform labile organic carbon is part of Reserves and part of Structures
       Cmic_12C=fr*R_12C+fs*S_12C
@@ -83,16 +81,16 @@ DB_cal_deathD_py<-function(dataset, py_pars){
       #If C in Reserves is insufficient to cover maintnance of Structures (i.e. an is negative),
       #respective amount of Structures are lost to DOC and Cres pool.
       #The partitioning of C lost from Structures between DOC and Cres pool is controlled by the fs parameter.
-      dR_12C<-Ac_glucose*Cu_glucose*(1-Gatm)+Ac_DOC*Cu_DOC*(1-DOCatm)-f*R_12C
-      dR_13C<-Ac_glucose*Cu_glucose*Gatm+Ac_DOC*Cu_DOC*DOCatm-f*R_13C
-      dS_12C<-pmax(an*Yu*(1-Ratm), 0)+pmin(0, an/mr*(1-Satm))
-      dS_13C<-pmax(an*Yu*Ratm, 0)+pmin(0, an/mr*Satm)
-      dG_12C<--Cu_glucose*(1-Gatm)
-      dG_13C<--Cu_glucose*Gatm
-      dDOC_12C<--Cu_DOC*(1-DOCatm)-pmin(0, an/mr*(1-Satm)*fs)
-      dDOC_13C<--Cu_DOC*DOCatm-pmin(0, an/mr*Satm*fs)
-      dCres_12C<--pmin(0, an/mr*(1-Satm)*(1-fs))
-      dCres_13C<--pmin(0, an/mr*Satm*(1-fs))
+      dR_12C<-Ac_glucose*Cu_glucose12+Ac_DOC*Cu_DOC12-f*R_12C
+      dR_13C<-Ac_glucose*Cu_glucose13+Ac_DOC*Cu_DOC13-(1+D)*f*R_13C
+      dS_12C<-pmax(an12*Yu, 0)+pmin(0, an12/mr)
+      dS_13C<-pmax(an13*Yu, 0)+pmin(0, an13/mr)
+      dG_12C<--Cu_glucose12
+      dG_13C<--Cu_glucose13
+      dDOC_12C<--Cu_DOC12-pmin(0, an12/mr*fs)
+      dDOC_13C<--Cu_DOC13-pmin(0, an13/mr*fs)
+      dCres_12C<--pmin(0, an12/mr*(1-fs))
+      dCres_13C<--pmin(0, an13/mr*(1-fs))
       dCO2_12C<-r_12C
       dCO2_13C<-r_13C
       
@@ -113,7 +111,7 @@ DB_cal_deathD_py<-function(dataset, py_pars){
     par<-x
     names(par)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
                   "Ac_DOC", "Vmax_DOC", "Km_DOC",
-                  "mr", "f", "Yu", "D", "fs", "fr", "Rinit")
+                  "mr", "f", "D", "Yu", "fs", "fr", "Rinit")
     
     #Extracting initial concentration of state variables from data
     #The initial abundance of Reserves and Strctures in microbial biomass is not know.
@@ -181,7 +179,7 @@ DB_cal_deathD_py<-function(dataset, py_pars){
   py_pars<-py_pars
   names(py_pars)<-c("Ac_glucose", "Vmax_glucose", "Km_glucose", 
                     "Ac_DOC", "Vmax_DOC", "Km_DOC",
-                    "mr", "f", "Yu", "D", "fs", "fr", "Rinit")
+                    "mr", "f", "D", "Yu", "fs", "fr", "Rinit")
   
   R_12Cinit=py_pars[["Rinit"]]*(1-as.numeric(dataset[1, "Cmic13init"])/
                               (as.numeric(dataset[1, "Cmic13init"])+as.numeric(dataset[1, "Cmic12init"])))
