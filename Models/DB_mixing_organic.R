@@ -224,7 +224,7 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
   }
   #define names of parameters
   #The only parameter that will be estimated is Rinit
-  parnames<-c("Rinit")
+  parnames<-c("RSinit")
 
   #All treatments are analysed sequentially. Parallel for loop computing function is defined here.
   epar<-function(unlabelled, labelled){
@@ -253,40 +253,37 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
       #Therefore, 4 initial states are defined and 4 model simulations are run.
       #These are merged together and the differences between simulations and measurements are minimized
       #First set of initial parameters. The fast initial glucose sorption is accounted for.
-      R_12Cinit1=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))
-      R_13Cinit1=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])
-      S_12Cinit1=(as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit1)/mparl[["fs"]]
-      S_13Cinit1=(as.numeric(unlabelled[1, "Cmic"])*as.numeric(unlabelled[1, "Cmicatm"])-mparl[["fr"]]*R_13Cinit1)/mparl[["fs"]]
+      R_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+      R_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
+      S_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+      S_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
       G_12Cinit1=as.numeric(labelled[1, "Glcorrected"])*(1-0.06296353)
       G_13Cinit1=as.numeric(labelled[1, "Glcorrected"])*0.06296353
       DOC_12Cinit1=as.numeric(unlabelled[1, "DOC2"])*(1-as.numeric(unlabelled[1, "DOCatm"]))
       DOC_13Cinit1=as.numeric(unlabelled[1, "DOC2"])*as.numeric(unlabelled[1, "DOCatm"])
-      #Second set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-      #microbial biomass in replicate 1 and 2.
-      R_12Cinit2=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      R_13Cinit2=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit2=(as.numeric(unlabelled[2, "Cmic"])*(1-as.numeric(unlabelled[2, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit2)/mparl[["fs"]]
-      S_13Cinit2=(as.numeric(unlabelled[2, "Cmic"])*as.numeric(unlabelled[2, "Cmicatm"])-mparl[["fr"]]*R_13Cinit2)/mparl[["fs"]]
+      #Second set of initial parameters
+      R_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+      R_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
+      S_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+      S_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
       G_12Cinit2=as.numeric(labelled[2, "Glcorrected"])*(1-0.06296353)
       G_13Cinit2=as.numeric(labelled[2, "Glcorrected"])*0.06296353
       DOC_12Cinit2=as.numeric(unlabelled[2, "DOC2"])*(1-as.numeric(unlabelled[2, "DOCatm"]))
       DOC_13Cinit2=as.numeric(unlabelled[2, "DOC2"])*as.numeric(unlabelled[2, "DOCatm"])
-      #Third set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-      #microbial biomass in replicate 1 and 3.
-      R_12Cinit3=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      R_13Cinit3=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit3=(as.numeric(unlabelled[3, "Cmic"])*(1-as.numeric(unlabelled[3, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit3)/mparl[["fs"]]
-      S_13Cinit3=(as.numeric(unlabelled[3, "Cmic"])*as.numeric(unlabelled[3, "Cmicatm"])-mparl[["fr"]]*R_13Cinit3)/mparl[["fs"]]
+      #Third set of initial parameters 
+      R_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+      R_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
+      S_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+      S_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
       G_12Cinit3=as.numeric(labelled[3, "Glcorrected"])*(1-0.06296353)
       G_13Cinit3=as.numeric(labelled[3, "Glcorrected"])*0.06296353
       DOC_12Cinit3=as.numeric(unlabelled[3, "DOC2"])*(1-as.numeric(unlabelled[3, "DOCatm"]))
       DOC_13Cinit3=as.numeric(unlabelled[3, "DOC2"])*as.numeric(unlabelled[3, "DOCatm"])
-      #Fourth set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-      #microbial biomass in replicate 1 and 4.
-      R_12Cinit4=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      R_13Cinit4=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-      S_12Cinit4=(as.numeric(unlabelled[4, "Cmic"])*(1-as.numeric(unlabelled[4, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit4)/mparl[["fs"]]
-      S_13Cinit4=(as.numeric(unlabelled[4, "Cmic"])*as.numeric(unlabelled[4, "Cmicatm"])-mparl[["fr"]]*R_13Cinit4)/mparl[["fs"]]
+      #Fourth set of initial parameters
+      R_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+      R_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
+      S_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+      S_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
       G_12Cinit4=as.numeric(labelled[4, "Glcorrected"])*(1-0.06296353)
       G_13Cinit4=as.numeric(labelled[4, "Glcorrected"])*0.06296353
       DOC_12Cinit4=as.numeric(unlabelled[4, "DOC2"])*(1-as.numeric(unlabelled[4, "DOCatm"]))
@@ -389,17 +386,13 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
       yhat_alll<-yhat_alll[order(yhat_alll$time), ]
 
       #variables that were measured in the experiment are extracted
-      yhatl<-select(yhat_alll, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
+      yhatl<-select(yhat_alll, c("time", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
 
       #convert the simulated dataset into long format data frame
       Yhatl<-melt(yhatl, id.vars = "time")
 
       #extract the relevant measurements from the dataset
       obsl<-data.frame(time = yhatl$time,
-                       G_12C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*(1-0.06296353),
-                                 as.numeric(labelled[c(5:8), "DOCg"])*(1-0.06296353)),
-                       G_13C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*0.06296353,
-                                 as.numeric(labelled[c(5:8), "DOCg"])*0.06296353),
                        DOC_12C = c(as.numeric(labelled[c(1:4), "DOC2"])*(1-as.numeric(labelled[c(1:4), "DOCatm"])),
                                    (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*(1-as.numeric(unlabelled[c(5:8), "DOCatm"]))),
                        DOC_13C = c(as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
@@ -433,12 +426,10 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
     }
 
     #Second, model parameters are estimated
-    Rinit_guess=as.numeric(unlabelled[1, "Cmic"])
-    
     par_mcmc<-modMCMC(f=cost,
-                      p=Rinit_guess*0.5,
-                      lower=Rinit_guess*1e-3,
-                      upper=Rinit_guess*0.95, niter=10000)
+                      p=1,
+                      lower=1e-4,
+                      upper=100, niter=10000)
 
     #lower and upper limits for parameters estimates are extracted
     pl<-summary(par_mcmc)["min",]
@@ -512,40 +503,37 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
     #Therefore, 4 initial states are defined and 4 model simulations are run.
     #These are merged together and the differences between simulations and measurements are minimized
     #First set of initial parameters. The fast initial glucose sorption is accounted for.
-    R_12Cinit1=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))
-    R_13Cinit1=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])
-    S_12Cinit1=(as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit1)/mparl[["fs"]]
-    S_13Cinit1=(as.numeric(unlabelled[1, "Cmic"])*as.numeric(unlabelled[1, "Cmicatm"])-mparl[["fr"]]*R_13Cinit1)/mparl[["fs"]]
+    R_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+    R_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
+    S_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+    S_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
     G_12Cinit1=as.numeric(labelled[1, "Glcorrected"])*(1-0.06296353)
     G_13Cinit1=as.numeric(labelled[1, "Glcorrected"])*0.06296353
     DOC_12Cinit1=as.numeric(unlabelled[1, "DOC2"])*(1-as.numeric(unlabelled[1, "DOCatm"]))
     DOC_13Cinit1=as.numeric(unlabelled[1, "DOC2"])*as.numeric(unlabelled[1, "DOCatm"])
-    #Second set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 2.
-    R_12Cinit2=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit2=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit2=(as.numeric(unlabelled[2, "Cmic"])*(1-as.numeric(unlabelled[2, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit2)/mparl[["fs"]]
-    S_13Cinit2=(as.numeric(unlabelled[2, "Cmic"])*as.numeric(unlabelled[2, "Cmicatm"])-mparl[["fr"]]*R_13Cinit2)/mparl[["fs"]]
+    #Second set of initial parameters
+    R_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+    R_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
+    S_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+    S_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
     G_12Cinit2=as.numeric(labelled[2, "Glcorrected"])*(1-0.06296353)
     G_13Cinit2=as.numeric(labelled[2, "Glcorrected"])*0.06296353
     DOC_12Cinit2=as.numeric(unlabelled[2, "DOC2"])*(1-as.numeric(unlabelled[2, "DOCatm"]))
     DOC_13Cinit2=as.numeric(unlabelled[2, "DOC2"])*as.numeric(unlabelled[2, "DOCatm"])
-    #Third set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 3.
-    R_12Cinit3=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit3=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit3=(as.numeric(unlabelled[3, "Cmic"])*(1-as.numeric(unlabelled[3, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit3)/mparl[["fs"]]
-    S_13Cinit3=(as.numeric(unlabelled[3, "Cmic"])*as.numeric(unlabelled[3, "Cmicatm"])-mparl[["fr"]]*R_13Cinit3)/mparl[["fs"]]
+    #Third set of initial parameters 
+    R_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+    R_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
+    S_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+    S_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
     G_12Cinit3=as.numeric(labelled[3, "Glcorrected"])*(1-0.06296353)
     G_13Cinit3=as.numeric(labelled[3, "Glcorrected"])*0.06296353
     DOC_12Cinit3=as.numeric(unlabelled[3, "DOC2"])*(1-as.numeric(unlabelled[3, "DOCatm"]))
     DOC_13Cinit3=as.numeric(unlabelled[3, "DOC2"])*as.numeric(unlabelled[3, "DOCatm"])
-    #Fourth set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 4.
-    R_12Cinit4=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit4=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit4=(as.numeric(unlabelled[4, "Cmic"])*(1-as.numeric(unlabelled[4, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit4)/mparl[["fs"]]
-    S_13Cinit4=(as.numeric(unlabelled[4, "Cmic"])*as.numeric(unlabelled[4, "Cmicatm"])-mparl[["fr"]]*R_13Cinit4)/mparl[["fs"]]
+    #Fourth set of initial parameters
+    R_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+    R_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
+    S_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+    S_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
     G_12Cinit4=as.numeric(labelled[4, "Glcorrected"])*(1-0.06296353)
     G_13Cinit4=as.numeric(labelled[4, "Glcorrected"])*0.06296353
     DOC_12Cinit4=as.numeric(unlabelled[4, "DOC2"])*(1-as.numeric(unlabelled[4, "DOCatm"]))
@@ -647,17 +635,13 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
     yhat_alll<-yhat_alll[order(yhat_alll$time), ]
 
     #variables that were measured in the experiment are extracted
-    yhatl<-select(yhat_alll, c("time", "G_12C", "G_13C", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
+    yhatl<-select(yhat_alll, c("time", "DOC_12C", "DOC_13C", "CO2_12C", "CO2_13C", "Cmic_12C", "Cmic_13C"))
 
     #convert the simulated dataset into long format data frame
     Yhatl<-melt(yhatl, id.vars = "time")
 
     #extract the relevant measurements from the dataset
     obsl<-data.frame(time = yhatl$time,
-                     G_12C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*(1-0.06296353),
-                               as.numeric(labelled[c(5:8), "DOCg"])*(1-0.06296353)),
-                     G_13C = c(as.numeric(labelled[c(1:4), "Glcorrected"])*0.06296353,
-                               as.numeric(labelled[c(5:8), "DOCg"])*0.06296353),
                      DOC_12C = c(as.numeric(labelled[c(1:4), "DOC2"])*(1-as.numeric(labelled[c(1:4), "DOCatm"])),
                                  (as.numeric(labelled[c(5:8), "DOC2"])-as.numeric(labelled[c(5:8), "DOCg"]))*(1-as.numeric(unlabelled[c(5:8), "DOCatm"]))),
                      DOC_13C = c(as.numeric(labelled[c(1:4), "DOC2"])*as.numeric(labelled[c(1:4), "DOCatm"]),
@@ -775,40 +759,37 @@ DB_mixing_organic<-function(dataset, initPL, initCT){
     #Therefore, 4 initial states are defined and 4 model simulations are run.
     #These are merged together and the differences between simulations and measurements are minimized
     #First set of initial parameters. The fast initial glucose sorption is accounted for.
-    R_12Cinit1=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))
-    R_13Cinit1=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])
-    S_12Cinit1=(as.numeric(unlabelled[1, "Cmic"])*(1-as.numeric(unlabelled[1, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit1)/mparl[["fs"]]
-    S_13Cinit1=(as.numeric(unlabelled[1, "Cmic"])*as.numeric(unlabelled[1, "Cmicatm"])-mparl[["fr"]]*R_13Cinit1)/mparl[["fs"]]
+    R_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+    R_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
+    S_12Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[1, "Cmicatm"]))
+    S_13Cinit1=as.numeric(unlabelled[1, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[1, "Cmicatm"]))
     G_12Cinit1=as.numeric(labelled[1, "Glcorrected"])*(1-0.06296353)
     G_13Cinit1=as.numeric(labelled[1, "Glcorrected"])*0.06296353
     DOC_12Cinit1=as.numeric(unlabelled[1, "DOC2"])*(1-as.numeric(unlabelled[1, "DOCatm"]))
     DOC_13Cinit1=as.numeric(unlabelled[1, "DOC2"])*as.numeric(unlabelled[1, "DOCatm"])
-    #Second set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 2.
-    R_12Cinit2=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit2=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[2, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit2=(as.numeric(unlabelled[2, "Cmic"])*(1-as.numeric(unlabelled[2, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit2)/mparl[["fs"]]
-    S_13Cinit2=(as.numeric(unlabelled[2, "Cmic"])*as.numeric(unlabelled[2, "Cmicatm"])-mparl[["fr"]]*R_13Cinit2)/mparl[["fs"]]
+    #Second set of initial parameters
+    R_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+    R_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
+    S_12Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[2, "Cmicatm"]))
+    S_13Cinit2=as.numeric(unlabelled[2, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[2, "Cmicatm"]))
     G_12Cinit2=as.numeric(labelled[2, "Glcorrected"])*(1-0.06296353)
     G_13Cinit2=as.numeric(labelled[2, "Glcorrected"])*0.06296353
     DOC_12Cinit2=as.numeric(unlabelled[2, "DOC2"])*(1-as.numeric(unlabelled[2, "DOCatm"]))
     DOC_13Cinit2=as.numeric(unlabelled[2, "DOC2"])*as.numeric(unlabelled[2, "DOCatm"])
-    #Third set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 3.
-    R_12Cinit3=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit3=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[3, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit3=(as.numeric(unlabelled[3, "Cmic"])*(1-as.numeric(unlabelled[3, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit3)/mparl[["fs"]]
-    S_13Cinit3=(as.numeric(unlabelled[3, "Cmic"])*as.numeric(unlabelled[3, "Cmicatm"])-mparl[["fr"]]*R_13Cinit3)/mparl[["fs"]]
+    #Third set of initial parameters 
+    R_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+    R_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
+    S_12Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[3, "Cmicatm"]))
+    S_13Cinit3=as.numeric(unlabelled[3, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[3, "Cmicatm"]))
     G_12Cinit3=as.numeric(labelled[3, "Glcorrected"])*(1-0.06296353)
     G_13Cinit3=as.numeric(labelled[3, "Glcorrected"])*0.06296353
     DOC_12Cinit3=as.numeric(unlabelled[3, "DOC2"])*(1-as.numeric(unlabelled[3, "DOCatm"]))
     DOC_13Cinit3=as.numeric(unlabelled[3, "DOC2"])*as.numeric(unlabelled[3, "DOCatm"])
-    #Fourth set of initial parameters. Parameter "Rinit" is scaled by a ratio between the
-    #microbial biomass in replicate 1 and 4.
-    R_12Cinit4=par[["Rinit"]]*(1-as.numeric(unlabelled[1, "Cmicatm"]))*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    R_13Cinit4=par[["Rinit"]]*as.numeric(unlabelled[1, "Cmicatm"])*(as.numeric(unlabelled[4, "Cmic"])/as.numeric(unlabelled[1, "Cmic"]))
-    S_12Cinit4=(as.numeric(unlabelled[4, "Cmic"])*(1-as.numeric(unlabelled[4, "Cmicatm"]))-mparl[["fr"]]*R_12Cinit4)/mparl[["fs"]]
-    S_13Cinit4=(as.numeric(unlabelled[4, "Cmic"])*as.numeric(unlabelled[4, "Cmicatm"])-mparl[["fr"]]*R_13Cinit4)/mparl[["fs"]]
+    #Fourth set of initial parameters
+    R_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+    R_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]+mparl[["fs"]]/par[["RSinit"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
+    S_12Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(1-as.numeric(unlabelled[4, "Cmicatm"]))
+    S_13Cinit4=as.numeric(unlabelled[4, "Cmic"])/(mparl[["fr"]]*par[["RSinit"]]+mparl[["fs"]])*(as.numeric(unlabelled[4, "Cmicatm"]))
     G_12Cinit4=as.numeric(labelled[4, "Glcorrected"])*(1-0.06296353)
     G_13Cinit4=as.numeric(labelled[4, "Glcorrected"])*0.06296353
     DOC_12Cinit4=as.numeric(unlabelled[4, "DOC2"])*(1-as.numeric(unlabelled[4, "DOCatm"]))

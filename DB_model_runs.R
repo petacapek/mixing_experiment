@@ -72,6 +72,22 @@ CT_cal_py$goodness$Gfit
 ggplot(PL_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(CT_cal_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 
+source("Models/DB_cal_death_pyRS.R")
+#read the parameters
+py_parsPLRS <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/PL_parametersRS.csv", header = F))
+py_parsCTRS <- as.numeric(read.csv("./DB_concept/Hasan_Jolanta/CT_parametersRS.csv", header = F))
+
+PL_cal_pyRS<-DB_cal_death_pyRS(dataset = cal_data[(cal_data$Soil=="PL" & cal_data$Status=="A"), ],
+                           py_pars = py_parsPLRS)
+CT_cal_pyRS<-DB_cal_death_pyRS(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status=="A"), ],
+                           py_pars = py_parsCTRS)
+
+PL_cal_pyRS$goodness$Gfit
+CT_cal_pyRS$goodness$Gfit
+
+ggplot(PL_cal_pyRS$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=PL_cal_pyRS$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(CT_cal_pyRS$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=CT_cal_pyRS$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+
 #Marstorp 1999
 source("Models/DB_M_death_py.R")
 Mdata<-read.csv("./DB_concept/Marstorp/marstorp1999.csv")
@@ -411,12 +427,12 @@ Simul_f %>% filter(horizon=="Organic soil" & variable=="Cmic_12C") %>%
 ######################################Organic soil only#######################################
 #Use model parameters from calibration phase - same soils
 #Difference is theoretically given by the initial amount of Reserves
-names(py_parsPL)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+names(py_parsPLRS)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                     "Ac_DOC", "Vmax", "Km",
-                    "mr", "f", "Yu", "fs", "fr", "Rinit")
-names(py_parsCT)<-c("Ac_glucose", "Vmaxg", "Kmg", 
+                    "mr", "f", "Yu", "fs", "fr", "RSinit")
+names(py_parsCTRS)<-c("Ac_glucose", "Vmaxg", "Kmg", 
                     "Ac_DOC", "Vmax", "Km",
-                    "mr", "f", "Yu", "fs", "fr", "Rinit")
+                    "mr", "f", "Yu", "fs", "fr", "RSinit")
 
 #loading the function
 source("./Models/DB_mixing_organic.R")
@@ -429,7 +445,7 @@ cl<-makeCluster(no_cors)
 registerDoParallel(cl)
 
 #function run
-db_mixing_organic<-DB_mixing_organic(dataset=mixing, initPL = py_parsPL, initCT = py_parsCT)
+db_mixing_organic<-DB_mixing_organic(dataset=mixing, initPL = py_parsPLRS, initCT = py_parsCTRS)
 
 stopImplicitCluster()
 
