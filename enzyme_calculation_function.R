@@ -364,37 +364,43 @@ enzymes_calc<-function(filepath, Sconc){
   
   ######################################################################################################
   #the last calculation is the enzymatic activity
-  #the calculated activity has a unit 1/hour (it is decay constant)
+  #the calculated values have following units - Vmax - µmol/h/µmol(Substrate), Km - µmols
   
   #creat new data frame with all variables I need to know for the calculation
   activity<-rbind(final_t0[,c("Sample", "E", "time", "product", "conc")],
                   final_t1[,c("Sample", "E", "time", "product", "conc")],
                   final_t2[,c("Sample", "E", "time", "product", "conc")])
-  #data transformation for linera regression fit
-  activity$v<-with(activity, log(conc)-log(conc-product))
+  #data transformation for linear regression
+  activity$y<-with(activity, product/time)
+  activity$x<-with(activity, log(1-product/conc)/time)
   
   
   #enzyme activity is calculated for each sample and each enzyme
   #summary table is created first
   res<-data.frame(Sample=rep(IDs, each=5),
                   E=rep(unique(activity$E, times=length(IDs))))
-  res$Activity<-vector("numeric", length = nrow(res))
-                
+  res$Vmax<-vector("numeric", length = nrow(res))
+  res$Km<-vector("numeric", length = nrow(res))              
   
   #calculation
   for(i in IDs){
     
     for(n in unique(activity$E)){
       
-      res[(res$Sample==i & res$E==n), "Activity"]<-as.numeric(coef(lm(v~time-1, 
-                                                              data=activity[(activity$Sample==i & activity$E==n), ])))
+      res[(res$Sample==i & res$E==n), "Vmax"]<-lmodel2(y~x, data=activity[(activity$Sample==i & activity$E==n), ], 
+                                                       nperm = 999)$regression.results[2,2]
+      res[(res$Sample==i & res$E==n), "Km"]<-(-lmodel2(y~x, data=activity[(activity$Sample==i & activity$E==n), ],
+                                                     nperm = 999)$regression.results[2,3])
     }
   }
   
   #transform to short format
-  res_final<-reshape(res, idvar = "Sample", timevar = "E", direction = "wide")
-  colnames(res_final)<-c("Sample", "glu", "cel", "phos", "leu", "chit")
+  res_finala<-reshape(res[, c("Sample", "E", "Vmax")], idvar = "Sample", timevar = "E", direction = "wide")
+  colnames(res_finala)<-c("Sample", "gluVmax", "celVmax", "phosVmax", "leuVmax", "chitVmax")
+  res_finalb<-reshape(res[, c("Sample", "E", "Km")], idvar = "Sample", timevar = "E", direction = "wide")
+  colnames(res_finalb)<-c("Sample", "gluKm", "celKm", "phosKm", "leuKm", "chitKm")
   
+  res_final<-cbind(res_finala, res_finalb[,-1])
   return(res_final)
 }
 

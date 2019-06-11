@@ -703,5 +703,22 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((PH)
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
 
-
+##pH
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(pH), y=mean(pH)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=horizont))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = c(0.1, 0.8),
+                  legend.key.size = unit(0.3, "in"),
+                  legend.title = element_blank())+
+  ylab(expression(paste("pH")))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
   
+##W
+mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DWovlhceni), y=mean(DWovlhceni)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=horizont))+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = c(0.1, 0.8),
+                  legend.key.size = unit(0.3, "in"),
+                  legend.title = element_blank())+
+  ylab(expression(paste("DW")))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))

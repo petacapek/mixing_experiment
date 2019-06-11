@@ -196,3 +196,111 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd((pho
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
   ylab(expression(paste(E[P]/P[MB])))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+#####################################Duggleby 1995################################################
+source("enzyme_calculation_function.R")
+library(lmodel2)
+
+Sconc<-read.xlsx(xlsxFile = c("./Enzymes_data/MUF/Sconcentrations.xlsx"))
+
+#Files 
+fenz<-list.files(path = "./Enzymes_data/MUF/")[-c(46:48)]
+fenz<-paste0("./Enzymes_data/MUF/", fenz)
+
+#First file
+Enz<-enzymes_calc(filepath = fenz[1], Sconc = Sconc)
+
+#The rest of the files
+for(i in 2:length(fenz)){
+  Enz<-rbind(Enz, enzymes_calc(filepath = fenz[i], Sconc = Sconc))
+}
+
+Enz2<-Enz
+
+Enz2[Enz2$gluVmax<0, "gluVmax"]<-0
+Enz2[Enz2$celVmax<0, "celVmax"]<-0
+Enz2[Enz2$phosVmax<0, "phosVmax"]<-0
+Enz2[Enz2$leuVmax<0, "leuVmax"]<-0
+Enz2[Enz2$chitVmax<0, "chitVmax"]<-0
+
+Enz$Sample<-as.factor(Enz$Sample)
+Enz$Sample<-factor(Enz$Sample, levels = unique(Sconc$Sample))
+Enz<-Enz[order(Enz$Sample), ]
+
+Enz_complete<-rbind(Enz2[1:40, ], Enz2[1:40, ], Enz2[41:120, ])
+
+mich2e<-cbind(mich2, Enz_complete[,-1])
+
+###Plot Vmaxes
+##beta-glucosidase
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(gluVmax, na.rm = T), 
+                                                                     y=mean(gluVmax, na.rm = T)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.88),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(V[MAX],~beta,"-glucosidase ( ",mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##cellobiosidase
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(celVmax, na.rm = T), 
+                                                                     y=mean(celVmax, na.rm = T)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(V[MAX]," cellobiosidase ( ",mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##leucin-aminopeptidase
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(leuVmax), y=mean(leuVmax)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.92),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(V[MAX]," leucin aminopeptidase ( ",mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##chitinase
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(chitVmax), y=mean(chitVmax)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.8, 0.1),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(V[MAX]," chitinase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+##phosphatase
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(phosVmax), y=mean(phosVmax)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(V[MAX]," phosphatase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  geom_hline(yintercept = 0)
+
+##phosphatase Km
+mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(phosKm), y=mean(phosKm)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(K[M]," phosphatase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
+
+PKMs<-as.data.frame(mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y=mean(phosVmax)))
+PKMs$PO4<-as.data.frame(mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(mean(Cmic)))[,5]
+
+ggplot(PKMs[PKMs$Legend=="Before incubation", ], aes(PO4, y))+geom_point(cex=6, aes(colour=Legend))+
+  theme_min+facet_wrap(~horizont, scales = "free")+stat_smooth(method = lm)
+
+ggplot(mich2e[mich2e$Legend=="Before incubation", ], aes(Nmic, phosVmax))+geom_point(cex=6, aes(colour=Legend))+
+  theme_min+stat_smooth(method = lm)+facet_wrap(~horizont, scales = "free")
+
