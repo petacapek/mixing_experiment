@@ -236,7 +236,7 @@ mich2e<-cbind(mich2, Enz_complete[,-1])
 mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(gluVmax, na.rm = T), 
                                                                      y=mean(gluVmax, na.rm = T)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
-  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.17, 0.88),
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = "top",
                                                               legend.key.size = unit(0.3, "in"),
                                                               legend.title = element_blank())+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
@@ -267,7 +267,7 @@ mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(leu
 ##chitinase
 mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(chitVmax), y=mean(chitVmax)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
-  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.8, 0.1),
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = "top",
                                                               legend.key.size = unit(0.3, "in"),
                                                               legend.title = element_blank())+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
@@ -277,7 +277,7 @@ mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(chi
 ##phosphatase
 mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(phosVmax), y=mean(phosVmax)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Legend))+
-  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.9),
+  facet_grid(znaceni~horizont, scales="free")+theme_min+theme(legend.position = "top",
                                                               legend.key.size = unit(0.3, "in"),
                                                               legend.title = element_blank())+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
@@ -295,12 +295,45 @@ mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(pho
   ylab(expression(paste(K[M]," phosphatase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
+
+
 PKMs<-as.data.frame(mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y=mean(phosVmax)))
 PKMs$PO4<-as.data.frame(mich2e %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(mean(Cmic)))[,5]
 
 ggplot(PKMs[PKMs$Legend=="Before incubation", ], aes(PO4, y))+geom_point(cex=6, aes(colour=Legend))+
   theme_min+facet_wrap(~horizont, scales = "free")+stat_smooth(method = lm)
 
-ggplot(mich2e[mich2e$Legend=="Before incubation", ], aes(Nmic, phosVmax))+geom_point(cex=6, aes(colour=Legend))+
-  theme_min+stat_smooth(method = lm)+facet_wrap(~horizont, scales = "free")
 
+mich2e %>% filter(znaceni=="Unlabelled" & Legend=="Before incubation") %>% 
+  group_by(Plesne, horizont) %>% summarize(y.sd=sd(phosVmax), 
+                                           y=mean(phosVmax),
+                                           x.sd = sd(NH42/PO42), x= mean(NH42/PO42)) %>%
+  ggplot(aes(x, y))+geom_point(pch=21, cex=6, fill="grey")+
+  theme_min+theme(legend.position = c(0.2, 0.9),
+                                                              legend.key.size = unit(0.3, "in"),
+                                                              legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  geom_errorbarh(aes(xmin=x-x.sd, xmax=x+x.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(K[M]," phosphatase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  stat_smooth(method = lm, se=F, colour="black")
+
+mich2e %>% filter(znaceni=="Unlabelled" & Legend=="Before incubation") %>% 
+  group_by(Plesne, horizont) %>% summarize(y.sd=sd(phosVmax), 
+                                           y=mean(phosVmax),
+                                           x.sd = sd(Nmic/Pmic/NH4*PO4), x= mean(Nmic/Pmic/NH4*PO4)) %>%
+  ggplot(aes(x, y))+geom_point(pch=21, cex=6, fill="grey")+
+  theme_min+theme(legend.position = c(0.2, 0.9),
+                  legend.key.size = unit(0.3, "in"),
+                  legend.title = element_blank())+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  geom_errorbarh(aes(xmin=x-x.sd, xmax=x+x.sd), width=0.1, lwd=0.5)+
+  ylab(expression(paste(K[M]," phosphatase ( ", mu, "mol ",g^{-1}~h^{-1}, ")" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  stat_smooth(method = lm, se=F, colour="black")
+
+ggplot(mich2e[(mich2e$znaceni=="Unlabelled" & mich2e$Legend=="Before incubation"), ],
+       aes(Nmic/Pmic/NH4*PO4, phosVmax))+geom_point(cex=6, aes(colour=horizont))+theme_min
+
+
+#Potreba 

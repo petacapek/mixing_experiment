@@ -18,6 +18,7 @@ library(dplyr)
 library(FME)
 library(reshape)
 library(ggplot2)
+library(gridExtra)
 library(foreach)
 library(doParallel)
 library(DEoptim)
@@ -97,7 +98,7 @@ M_py<-DB_M_death_py(dataset = Mdata, py_pars = py_parsM)
 
 M_py$goodness$Gfit
 
-ggplot(M_py$goodness$Yhat, aes(time, obs))+geom_point(cex=6)+geom_line(data=M_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
+ggplot(M_py$goodness$Yhat, aes(time, obs))+geom_point(cex=3)+geom_line(data=M_py$simul, aes(time, value))+facet_wrap(~variable, scales="free")
 ggplot(Mdata, aes(Time, CLC))+geom_point(cex=6)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
