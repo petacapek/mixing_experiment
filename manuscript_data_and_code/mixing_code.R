@@ -783,3 +783,32 @@ Cbalance %>% group_by(Plesne, Horizon, variable) %>%
   scale_fill_manual(values = c("black", "grey", "white"),
                     name = '',
                     labels = expression(C-CO[2], MBC, DOC))
+
+###
+
+####Read data
+gr<-read.csv("./manuscript_data_and_code/capek2016_data_SI.csv")
+
+####Estimate the growth rate for all sample
+cpred<-coef(lm(u0~CP, gr))
+mix_diff$grate_pred<-with(mix_diff, cpred[1]+(Cmic/Pmic)*cpred[2])
+
+gr_pred<-mix_diff %>% filter(Labelling=="NO") %>%
+  group_by(Plesne, Horizon) %>% summarize(CP=mean(Cmic/Pmic, na.rm = T),
+                                          CP.sd=sd(Cmic/Pmic, na.rm = T),
+                                          growth=mean(grate_pred, na.rm = T),
+                                          growth.sd=sd(grate_pred, na.rm = T))
+ggplot(data=gr_pred, aes(CP, growth))+geom_point(cex=6, pch=21, aes(fill=Horizon))+
+  theme_min+
+  xlab("MBC/MBP (mol/mol)")+
+  ylab(expression(paste(mu[0])))+
+  geom_hline(yintercept = 0, color='grey')+
+  geom_errorbarh(aes(xmin=CP-CP.sd, xmax=CP+CP.sd))+
+  geom_errorbar(aes(ymin=growth-growth.sd, ymax=growth+growth.sd))+
+  geom_point(data=gr, cex=6, color='grey', alpha=0.5, aes(CP, u0))+
+  stat_smooth(data=gr, aes(CP, u0), method = lm, se=F, color='black', lwd=0.5, fullrange = T)+
+  scale_fill_manual(values = c("grey", "white"))+
+  theme(legend.position = c(0.8, 0.85),
+        legend.title = element_blank())+
+  scale_x_continuous(breaks = c(20, 40, 60, 80, 100))+
+  scale_y_continuous(breaks=c(-1, -0.5, 0, 0.5, 1, 1.5, 2))
