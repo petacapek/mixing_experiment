@@ -1,5 +1,6 @@
 ################################################################################################
-#########################################Title##################################################
+#Biological and stoichiometric controls over nutrients mineralization and immobilization in two#
+###################################spruce forest soils##########################################
 ################################################################################################
 #Libraries
 library(dplyr)
@@ -784,7 +785,14 @@ Cbalance %>% group_by(Plesne, Horizon, variable) %>%
                     name = '',
                     labels = expression(C-CO[2], MBC, DOC))
 
-###
+###Figure S6: Expected growth rate of microbial community in litter (grey circles) and organic
+###topsoil (empty circles) from Plešné and Čertovo catchments without the external source of 
+###phosphorus (i.e. phosphors demand is covered exclusively from internal resources). Symbols 
+###represent mean values (n = 4) and error bars standard deviation of the mean. Light grey 
+###points represent original dataset of topsoil horizons published in Čapek et al. (2016). 
+###Solid black line represents linear relationship between microbial biomass carbon to phosphorus 
+###ratio and growth rate in absence of external source of phosphorus. 
+###Horizontal grey line denotes growth rate zero.
 
 ####Read data
 gr<-read.csv("./manuscript_data_and_code/capek2016_data_SI.csv")
