@@ -462,8 +462,140 @@ grid.arrange(
     ggtitle("C)"), ncol=1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #Supplementary information
+##Stoichiometry
+###Figure S1: Molar C/N (A) and C/P ratios of plant litter inputs into low elevation localities of Plesne 
+###(red circles) and Certovo (black circles) catchments with tree vegetation mostly unaffected by bark beetle 
+###infestation. Symbols represent medians and error bars lower and upper quartiles. The data for shown in this
+###figure can be downloaded at https://link.springer.com/article/10.1007/s10533-018-0470-x#SupplementaryMaterial. 
+
+#Please specify the path of the downloaded file
+fluxes<-read.xlsx(xlsxFile = c("./10533_2018_470_MOESM7_ESM.xlsx"), 2)
+
+grid.arrange(
+  fluxes %>% filter(Locality == "Lower") %>% group_by(Catchment, Year) %>%
+    summarize(y=median(Clitter/Nlitter, na.rm = T),
+              yl=quantile(Clitter/Nlitter, na.rm = T, probs=0.25),
+              yu=quantile(Clitter/Nlitter, na.rm = T, probs=0.75)) %>%
+    ggplot(aes(Year, y))+geom_point(cex=6, pch=21, aes(fill=Catchment))+
+    geom_errorbar(aes(ymin=yl, ymax=yu, color=Catchment), width=0.1)+
+    theme_min+xlim(2010, 2016)+
+    scale_fill_manual(values = c("black", "red"))+
+    scale_color_manual(values = c("black", "red"))+
+    theme(legend.title = element_blank(),
+          legend.position = c(0.15, 0.8))+
+    ylab("C/N of plant litter input (mol/mol)")+
+    ggtitle("A"),
+  fluxes %>% filter(Locality == "Lower") %>% group_by(Catchment, Year) %>%
+    summarize(y=median(Clitter/Plitter, na.rm = T), 
+              yl=quantile(Clitter/Plitter, na.rm = T, probs=0.25),
+              yu=quantile(Clitter/Plitter, na.rm = T, probs=0.75)) %>%
+    ggplot(aes(Year, y))+geom_point(cex=6, pch=21, aes(fill=Catchment), show.legend = F)+
+    geom_errorbar(aes(ymin=yl, ymax=yu, color=Catchment), width=0.1, show.legend = F)+
+    theme_min+xlim(2010, 2016)+
+    scale_fill_manual(values = c("black", "red"))+
+    scale_color_manual(values = c("black", "red"))+
+    ylab("C/P of plant litter input (mol/mol)")+
+    ggtitle("B"), ncol=1)
+
+###Figure S2: Molar DOC/DON (A, water extractable organic carbon to nitrogen), 
+###DOC/DOP (B, water extractable organic carbon to phosphorus), 
+###MBC/MBN (C, microbial biomass carbon to nitrogen), 
+###MBC/MBP (D, microbial biomass carbon to phosphorus) and 
+###MBN/MBN (E, microbial biomass nitrogen to phosphorus) ratio in litter (empty symbols) and 
+###topsoil organic layer (grey symbols) of two spruce forest soils (Plesne and Certovo) 
+###mixed at three different ratios (i.e. ¼, ½, and ¾). Triangles denote the values of 
+###respective ratio at the beginning of the incubation and circles the values at the end of 
+###the incubation. The effect of soil layer (Horizon), the proportion between Plesne and 
+###Certovo in soil mixture (Plesne : Certovo) and time on respective ratios is reported. 
+###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+mix$Legend<-ifelse(mix$TIME==0, "Before incubation", "After incubation")
+anova(glm(DOC/DON~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
+          data = subset(mix, Labelling=="NO"),
+          family = Gamma), test="F")
+mix %>% filter(Labelling=="NO") %>% 
+  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(DOC/DON), y=mean(DOC/DON)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = "right",
+                  legend.title = element_blank())+
+  #facet_wrap(~Horizon, scales="free")+
+  ylab(expression(paste("DOC/DON (mol/mol)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  annotate("text", label="Horizon***", 0.5, 45, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Plesne : Certovo n.s.", 0.5, 42, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Time n.s.", 0.5, 39, hjust="left", size=6, fontface="italic")+
+  ggtitle("A")+scale_shape_manual(values = c(21, 24))
+anova(glm(DOC/DOP~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
+          data = subset(mix, Labelling=="NO"),
+          family = Gamma), test="F")
+mix %>% filter(Labelling=="NO") %>% 
+  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(DOC/DOP), y=mean(DOC/DOP)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = "right",
+                  legend.title = element_blank())+
+  #facet_wrap(~Horizon, scales="free")+
+  ylab(expression(paste("DOC/DOP (mol/mol)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  annotate("text", label="Horizon**", 0.5, 2400, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Plesne : Certovo n.s.", 0.5, 2250, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Time n.s.", 0.5, 2100, hjust="left", size=6, fontface="italic")+
+  ggtitle("B")+scale_shape_manual(values = c(21, 24))
+anova(glm(Cmic/Nmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
+          data = subset(mix, Labelling=="NO"),
+          family = Gamma), test="F")
+mix %>% filter(Labelling=="NO") %>% 
+  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Cmic/Nmic), 
+                                                  y=mean(Cmic/Nmic)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = "right",
+                  legend.title = element_blank())+
+  #facet_wrap(~Horizon, scales="free")+
+  ylab(expression(paste("MBC/MBN (mol/mol)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  annotate("text", label="Horizon n.s.", 3.5, 16, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Plesne : Certovo n.s.", 3.5, 15, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Time n.s.", 3.5, 14, hjust="left", size=6, fontface="italic")+
+  ggtitle("C")+scale_shape_manual(values = c(21, 24))
+anova(glm(Cmic/Pmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
+          data = subset(mix, Labelling=="NO"),
+          family = Gamma), test="F")
+mix %>% filter(Labelling=="NO") %>% 
+  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Cmic/Pmic), 
+                                                  y=mean(Cmic/Pmic)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = "right",
+                  legend.title = element_blank())+
+  #facet_wrap(~Horizon, scales="free")+
+  ylab(expression(paste("MBC/MBP (mol/mol)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  annotate("text", label="Horizon***", 0.5, 80, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Plesne : Certovo n.s.", 0.5, 75, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Time n.s.", 0.5, 70, hjust="left", size=6, fontface="italic")+
+  ggtitle("D")+scale_shape_manual(values = c(21, 24))
+anova(glm(Nmic/Pmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
+          data = subset(mix, Labelling=="NO"),
+          family = Gamma), test="F")
+mix %>% filter(Labelling=="NO") %>% 
+  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Nmic/Pmic), 
+                                                  y=mean(Nmic/Pmic)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
+  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
+  theme_min+theme(legend.position = "right",
+                  legend.title = element_blank())+
+  #facet_wrap(~Horizon, scales="free")+
+  ylab(expression(paste("MBN/MBP (mol/mol)" )))+
+  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
+  annotate("text", label="Horizon***", 0.5, 8, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Plesne : Certovo n.s.", 0.5, 7.5, hjust="left", size=6, fontface="italic")+
+  annotate("text", label="Time n.s.", 0.5, 7, hjust="left", size=6, fontface="italic")+
+  ggtitle("E")+scale_shape_manual(values = c(21, 24))
+
+
 ##Initial conditions
-###Figure S1: Initial pH (A), amount of water extractable organic carbon (B), ammonia (C), 
+###Figure S3: Initial pH (A), amount of water extractable organic carbon (B), ammonia (C), 
 ###nitrates (D), organic nitrogen (E), organic phosphorus (F), phosphate (G), microbial biomass 
 ###carbon (H), nitrogen (I) and phosphorus (J) in litter (empty circles) and topsoil organic 
 ###layer (grey circles) of two spruce forest soils (Plesne and Certovo) mixed 
@@ -593,105 +725,8 @@ mix %>% filter(Labelling=="NO" & TIME==0) %>%
   annotate("text", label="Plesne : Certovo***", 0.5, 24, hjust="left", size=6, fontface="italic")+
   ggtitle("J")
 
-##Stoichiometry
-###Figure S2: Molar DOC/DON (A, water extractable organic carbon to nitrogen), 
-###DOC/DOP (B, water extractable organic carbon to phosphorus), 
-###MBC/MBN (C, microbial biomass carbon to nitrogen), 
-###MBC/MBP (D, microbial biomass carbon to phosphorus) and 
-###MBN/MBN (E, microbial biomass nitrogen to phosphorus) ratio in litter (empty symbols) and 
-###topsoil organic layer (grey symbols) of two spruce forest soils (Plesne and Certovo) 
-###mixed at three different ratios (i.e. ¼, ½, and ¾). Triangles denote the values of 
-###respective ratio at the beginning of the incubation and circles the values at the end of 
-###the incubation. The effect of soil layer (Horizon), the proportion between Plesne and 
-###Certovo in soil mixture (Plesne : Certovo) and time on respective ratios is reported. 
-###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
-mix$Legend<-ifelse(mix$TIME==0, "Before incubation", "After incubation")
-anova(glm(DOC/DON~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
-          data = subset(mix, Labelling=="NO"),
-          family = Gamma), test="F")
-mix %>% filter(Labelling=="NO") %>% 
-  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(DOC/DON), y=mean(DOC/DON)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
-  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  theme_min+theme(legend.position = "right",
-                  legend.title = element_blank())+
-  #facet_wrap(~Horizon, scales="free")+
-  ylab(expression(paste("DOC/DON (mol/mol)" )))+
-  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
-  annotate("text", label="Horizon***", 0.5, 45, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s.", 0.5, 42, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Time n.s.", 0.5, 39, hjust="left", size=6, fontface="italic")+
-  ggtitle("A")+scale_shape_manual(values = c(21, 24))
-anova(glm(DOC/DOP~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
-          data = subset(mix, Labelling=="NO"),
-          family = Gamma), test="F")
-mix %>% filter(Labelling=="NO") %>% 
-  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(DOC/DOP), y=mean(DOC/DOP)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
-  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  theme_min+theme(legend.position = "right",
-                  legend.title = element_blank())+
-  #facet_wrap(~Horizon, scales="free")+
-  ylab(expression(paste("DOC/DOP (mol/mol)" )))+
-  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
-  annotate("text", label="Horizon**", 0.5, 2400, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s.", 0.5, 2250, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Time n.s.", 0.5, 2100, hjust="left", size=6, fontface="italic")+
-  ggtitle("B")+scale_shape_manual(values = c(21, 24))
-anova(glm(Cmic/Nmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
-          data = subset(mix, Labelling=="NO"),
-          family = Gamma), test="F")
-mix %>% filter(Labelling=="NO") %>% 
-  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Cmic/Nmic), 
-                                                  y=mean(Cmic/Nmic)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
-  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  theme_min+theme(legend.position = "right",
-                  legend.title = element_blank())+
-  #facet_wrap(~Horizon, scales="free")+
-  ylab(expression(paste("MBC/MBN (mol/mol)" )))+
-  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
-  annotate("text", label="Horizon n.s.", 3.5, 16, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s.", 3.5, 15, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Time n.s.", 3.5, 14, hjust="left", size=6, fontface="italic")+
-  ggtitle("C")+scale_shape_manual(values = c(21, 24))
-anova(glm(Cmic/Pmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
-          data = subset(mix, Labelling=="NO"),
-          family = Gamma), test="F")
-mix %>% filter(Labelling=="NO") %>% 
-  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Cmic/Pmic), 
-                                                  y=mean(Cmic/Pmic)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
-  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  theme_min+theme(legend.position = "right",
-                  legend.title = element_blank())+
-  #facet_wrap(~Horizon, scales="free")+
-  ylab(expression(paste("MBC/MBP (mol/mol)" )))+
-  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
-  annotate("text", label="Horizon***", 0.5, 80, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s.", 0.5, 75, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Time n.s.", 0.5, 70, hjust="left", size=6, fontface="italic")+
-  ggtitle("D")+scale_shape_manual(values = c(21, 24))
-anova(glm(Nmic/Pmic~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
-          data = subset(mix, Labelling=="NO"),
-          family = Gamma), test="F")
-mix %>% filter(Labelling=="NO") %>% 
-  group_by(Plesne, Horizon, Legend) %>% summarize(y.sd=sd(Nmic/Pmic), 
-                                                  y=mean(Nmic/Pmic)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, aes(fill=Horizon, shape=Legend), show.legend = F)+
-  geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
-  theme_min+theme(legend.position = "right",
-                  legend.title = element_blank())+
-  #facet_wrap(~Horizon, scales="free")+
-  ylab(expression(paste("MBN/MBP (mol/mol)" )))+
-  xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))+
-  annotate("text", label="Horizon***", 0.5, 8, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s.", 0.5, 7.5, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Time n.s.", 0.5, 7, hjust="left", size=6, fontface="italic")+
-  ggtitle("E")+scale_shape_manual(values = c(21, 24))
-
 ##Microbial physiology
-###Figure S3: CUE (A, carbon use efficiency) and microbial biomass carbon turnover rate (B) 
+###Figure S4: CUE (A, carbon use efficiency) and microbial biomass carbon turnover rate (B) 
 ###in litter (empty symbols) and topsoil organic layer (grey symbols) of two spruce forest 
 ###soils (Plesne and Certovo) mixed at three different ratios (i.e. ¼, ½, and ¾). 
 ###The effect of soil layer (Horizon) and the proportion between Plesne and Certovo in soil 
@@ -734,7 +769,7 @@ mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>%
   ggtitle("B")
 
 
-###Figure S4: Cumulative CO2 loss from litter (empty symbols) and topsoil organic layer 
+###Figure S5: Cumulative CO2 loss from litter (empty symbols) and topsoil organic layer 
 ###(grey symbols) of two spruce forest soils (Plesne and Certovo) that have been mixed at 
 ###three different ratios (i.e. ¼, ½, and ¾). The effect of soil layer (Horizon) and the 
 ###proportion between Plesne and Certovo in soil mixture (Plesne : Certovo) on cumulative CO2 
@@ -756,7 +791,7 @@ mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>%
   annotate("text", label="Horizon***", 0.5, 24, hjust="left", size=6, fontface="italic")+
   annotate("text", label="Plesne : Certovo**", 0.5, 22, hjust="left", size=6, fontface="italic")
 
-###Figure S5: Amount of lost carbon in form of CO2 (black circles), microbial biomass carbon 
+###Figure S6: Amount of lost carbon in form of CO2 (black circles), microbial biomass carbon 
 ###(MBC, grey circles) and water extractable organic carbon (DOC, empty circles) in litter and
 ###topsoil organic layer of two spruce forest soils (Plesne and Certovo) mixed at three 
 ###different ratios (i.e. ¼, ½, and ¾). Symbols represent mean values (n = 4) and error bars 
@@ -785,7 +820,7 @@ Cbalance %>% group_by(Plesne, Horizon, variable) %>%
                     name = '',
                     labels = expression(C-CO[2], MBC, DOC))
 
-###Figure S6: Expected growth rate of microbial community in litter (grey circles) and organic
+###Figure S7: Expected growth rate of microbial community in litter (grey circles) and organic
 ###topsoil (empty circles) from Plešné and Čertovo catchments without the external source of 
 ###phosphorus (i.e. phosphors demand is covered exclusively from internal resources). Symbols 
 ###represent mean values (n = 4) and error bars standard deviation of the mean. Light grey 
