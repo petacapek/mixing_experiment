@@ -182,9 +182,9 @@ anova(Pm_t, test="F")
 ###############################Figures and calculations####################################
 ###########################################################################################
 #MAIN TEXT
-##Figure 2: Initial values of microbial biomass carbon to nitrogen (A) and phosphorus (C) ratio, 
-##and water extractable organic carbon to nitrogen (B) and phosphorus (D) ratio in two 
-##spruce forest soils (Plešné and Čertovo) mixed at three different ratios (i.e. ¼, ½, and ¾). 
+##Figure 2: Initial values of microbial biomass carbon to nitrogen (MBC:MBN; A) and phosphorus 
+##(MBC:MBP; C) ratio, and water extractable organic carbon to nitrogen (DOC:DON; B) and phosphorus (DOC:DOP; D)  
+##ratio in two spruce forest soils (Plešné and Čertovo) mixed at three different ratios (i.e. ¼, ½, and ¾). 
 ##Grey circles denote litter layer and empty circles topsoil organic layer. 
 ##Symbols represent mean values (n = 4) and error bars standard deviation of the mean. 
 ##Notice that all plots have different y-axes scales.
@@ -196,8 +196,8 @@ grid.arrange(
                                               position = position_dodge(width = 0.6))+
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
                   position = position_dodge(width = 0.6))+
-    theme_min+theme(legend.position = c(0.7, 0.85), legend.title = element_blank())+
-    ylab(expression(paste("Microbial biomass C/N (mol/mol)" )))+
+    theme_min+theme(legend.position = c(0.6, 0.8), legend.title = element_blank())+
+    ylab(expression(paste("MBC:MBN (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("A)")+scale_y_continuous(limits = c(10, 20)),
@@ -208,7 +208,7 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
                   position = position_dodge(width = 0.6), show.legend = F)+
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
-    ylab(expression(paste("Water extractable organic C/N (mol/mol)" )))+
+    ylab(expression(paste("DOC:DON (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("B)")+scale_y_continuous(limits = c(10, 30)),
@@ -219,7 +219,7 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
                   position = position_dodge(width = 0.6), show.legend = F)+
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
-    ylab(expression(paste("Microbial biomass C/P (mol/mol)" )))+
+    ylab(expression(paste("MBC:MBP (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("C)")+scale_y_continuous(limits = c(0, 80)),
@@ -230,12 +230,13 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
                   position = position_dodge(width = 0.6), show.legend = F)+
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
-    ylab(expression(paste("Water extractable organic C/P (mol/mol)" )))+
+    ylab(expression(paste("DOC:DOP (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("D)")+scale_y_continuous(limits = c(0, 2000)), ncol=2)
 
-##Figure 3: Net change of soil microbial biomass carbon (A), nitrogen (B) and phosphorus (P) 
+##Figure 3: Net change of soil microbial biomass carbon (MBC; A), nitrogen (MBN; B) 
+##and phosphorus (MBP; C) 
 ##after 48 hours incubation of two spruce forest soils (Plešné and Čertovo) mixed at three 
 ##different ratios (i.e. ¼, ½, and ¾). Grey circles denote litter layer and empty circles 
 ##topsoil organic layer. Symbols represent mean values (n = 4) and error bars standard 
@@ -253,10 +254,10 @@ grid.arrange(
     theme_min+
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6))+
-    ylab(expression(paste(Delta, " Microbial biomass carbon (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(Delta~MBC, " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
-    geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.7, 0.8),
+    geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.65, 0.8),
                                             legend.key.size = unit(0.3, "in"),
                                             legend.title = element_blank())+
     ggtitle("A)"),
@@ -267,7 +268,7 @@ grid.arrange(
     theme_min+theme(legend.position = c(0.2, 0.2))+
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6), show.legend = F)+
-    ylab(expression(paste(Delta, " Microbial biomass nitrogen (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(Delta~MBN, " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+#scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.8, 0.8),
@@ -281,7 +282,7 @@ grid.arrange(
     theme_min+theme(legend.position = c(0.2, 0.2))+
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6), show.legend = F)+
-    ylab(expression(paste(Delta, " Microbial biomass phosphorus (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(Delta~MBP, " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+#scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.8, 0.8),
@@ -315,14 +316,11 @@ Izo %>% filter(Labelling=="NO") %>%
                     name = '',
                     labels = expression(C-CO[2], K[2]~SO[4]-EC, MBC))
 
-##Figure 6: Net change of water extractable mineral nitrogen (NH4+ and NO3-) in litter (grey symbols) 
+##Figure 6: Net change of water extractable mineral nitrogen (ΔMN) in litter (grey symbols) 
 ##and topsoil organic layer (empty circles) of two spruce forest soils (Plešné and Čertovo) 
-##mixed at three different ratios (i.e. ¼, ½, and ¾). Blue circles represent expected change 
-##of water extractable mineral nitrogen assuming that (A): the entire source of organic carbon
-##and nitrogen for microbial growth is soil derived or (B): decaying microbial biomass partly 
-##contribute to the source of organic carbon and nitrogen (for details see Materials and 
-##methods section). Symbols represent mean values (n = 4) and error bars standard deviation 
-##of the mean.
+##mixed at three different ratios (i.e. ¼, ½, and ¾). Blue circles represent ΔMN calculated 
+##using eq. 1 with (A) and without (B) fMBC (for details see Materials and methods section). 
+##Symbols represent mean values (n = 4) and error bars standard deviation of the mean.
 
 ###Assuming no contribution of decaying microbial biomass
 mix_diff$CUE<-mix[c(1:80), c("CUE")]
@@ -365,7 +363,7 @@ grid.arrange(
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank(),
           axis.title.x = element_blank())+
-    ylab(expression(paste(Delta, " Mineral nitrogen (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(italic(Delta~M[N]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
@@ -379,7 +377,7 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank())+
-    ylab(expression(paste(Delta, " Mineral nitrogen (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(italic(Delta~M[N]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
@@ -426,7 +424,7 @@ grid.arrange(
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank(),
           axis.title.x = element_blank())+
-    ylab(expression(paste(Delta, " Mineral phosphorus (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
@@ -441,7 +439,7 @@ grid.arrange(
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank(),
           axis.title.x = element_blank())+
-    ylab(expression(paste(Delta, " Mineral phosphorus (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
@@ -454,7 +452,7 @@ grid.arrange(
     facet_grid(.~Horizon, scales="free")+theme_min+theme(legend.position = c(0.2, 0.2))+
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"))+
-    ylab(expression(paste(Delta, " Mineral phosphorus (", mu, "mol ",g^{-1}, ")" )))+
+    ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
