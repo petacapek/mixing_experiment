@@ -40,18 +40,18 @@ Mend_py<-function(dataset, py_pars){
       #Equations:
       #Uptake rate - we assume that glucose is preferred substrate for uptake/growth 
       #Organic carbon uptake rate - glucose
-      Cu_glucose=(1/CUEg)*(Vmaxg + mr)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
+      Cu_glucose=(1/CUE)*(Vmaxg + mr)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
       #Organic carbon uptake rate - DOC
-      Cu_DOC=(1/CUEs)*(Vmax + mr)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
+      Cu_DOC=(1/CUE)*(Vmax + mr)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
       
       #Growth respiration - glucose
-      RGg=(1/CUEg-1)*(Vmaxg)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
+      RGg=(1/CUE-1)*(Vmaxg)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
       #Maintnance respiration - glucose
-      RMg=(1/CUEg-1)*(mr)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
+      RMg=(1/CUE-1)*(mr)*(MBC_12C+MBC_13C)*(G_12C+G_13C)/(G_12C+G_13C+Kmg*(1+(DOC_12C+DOC_13C)/Km))#
       #Growth respiration - DOC
-      RGs=(1/CUEs-1)*(Vmax)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
+      RGs=(1/CUE-1)*(Vmax)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
       #Maintnance respiration - DOC
-      RMs=(1/CUEs-1)*(mr)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
+      RMs=(1/CUE-1)*(mr)*(MBC_12C+MBC_13C)*(DOC_12C+DOC_13C)/(DOC_12C+DOC_13C+Km*(1+(G_12C+G_13C)/Kmg))#
       
       #Scaling factors:
       Gatm=G_13C/(G_12C+G_13C)
@@ -89,7 +89,7 @@ Mend_py<-function(dataset, py_pars){
     par<-x
     names(par)<-c("Vmaxg", "Kmg", 
                   "Vmax", "Km",
-                  "mr", "CUEg", "CUEs", "kec")
+                  "mr", "CUE", "kec")
     
     #Extracting initial concentration of state variables from data
     MBC_12Cinit=as.numeric(dataset[1, "Cmic12init"])/par[["kec"]]
@@ -148,7 +148,7 @@ Mend_py<-function(dataset, py_pars){
   py_pars<-py_pars
   names(py_pars)<-c("Vmaxg", "Kmg", 
                 "Vmax", "Km",
-                "mr", "CUEg", "CUEs", "kec")
+                "mr", "CUE", "kec")
   
   #Extracting initial concentration of state variables from data
   MBC_12Cinit=as.numeric(dataset[1, "Cmic12init"])/py_pars[["kec"]]

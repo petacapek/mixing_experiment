@@ -50,16 +50,16 @@ Monod_py<-function(dataset, py_pars){
       Cmic_13C=kec*MBC_13C
       
       #States
-      dMBC_12C<-CUEg*Cu_glucose*(1-Gatm)+CUEs*Cu_DOC*(1-DOCatm)-kb*MBC_12C
-      dMBC_13C<-CUEg*Cu_glucose*Gatm+CUEs*Cu_DOC*DOCatm-kb*MBC_13C
+      dMBC_12C<-CUE*Cu_glucose*(1-Gatm)+CUE*Cu_DOC*(1-DOCatm)-kb*MBC_12C
+      dMBC_13C<-CUE*Cu_glucose*Gatm+CUE*Cu_DOC*DOCatm-kb*MBC_13C
       dG_12C<--Cu_glucose*(1-Gatm)
       dG_13C<--Cu_glucose*Gatm
       dDOC_12C<--Cu_DOC*(1-DOCatm)+kb*kec*MBC_12C
       dDOC_13C<--Cu_DOC*DOCatm+kb*kec*MBC_13C
       dCres_12C<-kb*(1-kec)*MBC_12C
       dCres_13C<-kb*(1-kec)*MBC_13C
-      dCO2_12C<-(1-CUEg)*Cu_glucose*(1-Gatm)+(1-CUEs)*Cu_DOC*(1-DOCatm)
-      dCO2_13C<-(1-CUEg)*Cu_glucose*Gatm+(1-CUEs)*Cu_DOC*DOCatm
+      dCO2_12C<-(1-CUE)*Cu_glucose*(1-Gatm)+(1-CUE)*Cu_DOC*(1-DOCatm)
+      dCO2_13C<-(1-CUE)*Cu_glucose*Gatm+(1-CUE)*Cu_DOC*DOCatm
       
       return(list(c(dMBC_12C, dMBC_13C, 
                     dG_12C, dG_13C, 
@@ -77,7 +77,7 @@ Monod_py<-function(dataset, py_pars){
     par<-x
     names(par)<-c("Vmaxg", "Kmg", 
                   "Vmax", "Km",
-                  "CUEg", "CUEs", "kb", "kec")
+                  "CUE", "kb", "kec")
     
     #Extracting initial concentration of state variables from data
     MBC_12Cinit=as.numeric(dataset[1, "Cmic12init"])/par[["kec"]]
@@ -136,7 +136,7 @@ Monod_py<-function(dataset, py_pars){
   py_pars<-py_pars
   names(py_pars)<-c("Vmaxg", "Kmg", 
                     "Vmax", "Km",
-                    "CUEg", "CUEs", "kb", "kec")
+                    "CUE", "kb", "kec")
   
   MBC_12Cinit=as.numeric(dataset[1, "Cmic12init"])/py_pars[["kec"]]
   MBC_13Cinit=as.numeric(dataset[1, "Cmic13init"])/py_pars[["kec"]]

@@ -101,7 +101,9 @@ DB_cal_death_py<-function(dataset, py_pars){
                     dG_12C, dG_13C, 
                     dDOC_12C, dDOC_13C, 
                     dCres_12C, dCres_13C,
-                    dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C))
+                    dCO2_12C, dCO2_13C), Cmic_12C=Cmic_12C, Cmic_13C=Cmic_13C,
+                  an = an, Cu_glucose=Cu_glucose,
+                  Cu_DOC=Cu_DOC))
       
     })
   }
