@@ -59,15 +59,6 @@ CT_monod_out<-Monod_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status
 PL_monod_out$goodness$Gfit
 CT_monod_out$goodness$Gfit
 
-ggplot(PL_monod_out$goodness$Yhat, aes(time, obs))+
-  geom_point(cex=6)+geom_line(data=PL_monod_out$simul, aes(time, value))+
-  geom_line(data=PL_cal_py$simul, aes(time, value), colour="red")+
-  facet_wrap(~variable, scales="free")
-ggplot(CT_monod_out$goodness$Yhat, aes(time, obs))+
-  geom_point(cex=6)+geom_line(data=CT_monod_out$simul, aes(time, value))+
-  geom_line(data=CT_cal_py$simul, aes(time, value), colour="red")+
-  facet_wrap(~variable, scales="free")
-
 #Calculate the significance of the difference
 ##F test
 ###Plesne
@@ -86,28 +77,28 @@ pf(q=(sum(PL_monod_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*
 ####Number of measurements
 ntCT<-5+5+4+4+5+5+4+4
 
-(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-  sum(CT_cal_py$goodness$Gfit$SSres)/(5)
-pf(q=(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-     sum(CT_cal_py$goodness$Gfit$SSres)/(5), 
-   df1=5, 
-   df2=ntCT-12, 
+(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 9)/
+  sum(CT_cal_py$goodness$Gfit$SSres)/(3)
+pf(q=(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 9)/
+     sum(CT_cal_py$goodness$Gfit$SSres)/(3), 
+   df1=3, 
+   df2=ntCT-9, 
    lower.tail=F)
 
 ####Summary table
 S1 <- data.frame(Fval = c((sum(PL_monod_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*(ntPL - 12)/
                         sum(PL_cal_py$goodness$Gfit$SSres)/(5),
-                      (sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-                        sum(CT_cal_py$goodness$Gfit$SSres)/(5)),
+                      (sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 9)/
+                        sum(CT_cal_py$goodness$Gfit$SSres)/(3)),
                 pval = c(pf(q=(sum(PL_monod_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*(ntPL - 12)/
                               sum(PL_cal_py$goodness$Gfit$SSres)/(5), 
                             df1=5, 
                             df2=ntPL-12, 
                             lower.tail=F),
-                         pf(q=(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-                              sum(CT_cal_py$goodness$Gfit$SSres)/(5), 
-                            df1=5, 
-                            df2=ntCT-12, 
+                         pf(q=(sum(CT_monod_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 11)/
+                              sum(CT_cal_py$goodness$Gfit$SSres)/(4), 
+                            df1=4, 
+                            df2=ntCT-11, 
                             lower.tail=F)))
 print(S1)
 
@@ -128,15 +119,6 @@ CT_mend_out<-Mend_py(dataset = cal_data[(cal_data$Soil=="CT" & cal_data$Status==
 PL_mend_out$goodness$Gfit
 CT_mend_out$goodness$Gfit
 
-ggplot(PL_mend_out$goodness$Yhat, aes(time, obs))+
-  geom_point(cex=6)+geom_line(data=PL_mend_out$simul, aes(time, value))+
-  geom_line(data=PL_cal_py$simul, aes(time, value), colour="red")+
-  facet_wrap(~variable, scales="free")
-ggplot(CT_mend_out$goodness$Yhat, aes(time, obs))+
-  geom_point(cex=6)+geom_line(data=CT_mend_out$simul, aes(time, value))+
-  geom_line(data=CT_cal_py$simul, aes(time, value), colour="red")+
-  facet_wrap(~variable, scales="free")
-
 #Calculate the significance of the difference
 ##F test
 ###Plesne
@@ -155,28 +137,28 @@ pf(q=(sum(PL_mend_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*(
 ####Number of measurements
 ntCT<-5+5+4+4+5+5+4+4
 
-(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-  sum(CT_cal_py$goodness$Gfit$SSres)/(5)
-pf(q=(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-     sum(CT_cal_py$goodness$Gfit$SSres)/(5), 
-   df1=5, 
-   df2=ntCT-12, 
+(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 11)/
+  sum(CT_cal_py$goodness$Gfit$SSres)/(4)
+pf(q=(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 11)/
+     sum(CT_cal_py$goodness$Gfit$SSres)/(4), 
+   df1=4, 
+   df2=ntCT-11, 
    lower.tail=F)
 
 ####Summary table
 S2 <- data.frame(Fval = c((sum(PL_mend_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*(ntPL - 12)/
                             sum(PL_cal_py$goodness$Gfit$SSres)/(5),
-                          (sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
+                          (sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 11)/
                             sum(CT_cal_py$goodness$Gfit$SSres)/(5)),
                  pval = c(pf(q=(sum(PL_mend_out$goodness$Gfit$SSres)-sum(PL_cal_py$goodness$Gfit$SSres))*(ntPL - 12)/
                                sum(PL_cal_py$goodness$Gfit$SSres)/(5), 
                              df1=5, 
                              df2=ntPL-12, 
                              lower.tail=F),
-                          pf(q=(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 12)/
-                               sum(CT_cal_py$goodness$Gfit$SSres)/(5), 
-                             df1=5, 
-                             df2=ntCT-12, 
+                          pf(q=(sum(CT_mend_out$goodness$Gfit$SSres)-sum(CT_cal_py$goodness$Gfit$SSres))*(ntCT - 11)/
+                               sum(CT_cal_py$goodness$Gfit$SSres)/(4), 
+                             df1=4, 
+                             df2=ntCT-11, 
                              lower.tail=F)))
 print(S2)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
