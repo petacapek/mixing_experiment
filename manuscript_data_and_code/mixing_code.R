@@ -200,7 +200,22 @@ grid.arrange(
     ylab(expression(paste("MBC:MBN (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
-    ggtitle("A)")+scale_y_continuous(limits = c(10, 20)),
+    ggtitle("A)")+scale_y_continuous(limits = c(10, 20),
+                                     breaks = c(10, 12, 14, 16, 18, 20)),
+  
+  mix %>% filter(Labelling=="NO" & TIME==0) %>% 
+    group_by(Plesne, Horizon) %>% summarize(y.sd=sd(Cmic/Pmic), y=mean(Cmic/Pmic)) %>%
+    ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Horizon), 
+                                              position = position_dodge(width = 0.6), show.legend = F)+
+    geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
+                  position = position_dodge(width = 0.6), show.legend = F)+
+    theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank(),
+                    plot.margin = unit(c(0.05, 0.05, 0.05, 0.35), "in"))+
+    ylab(expression(paste("MBC:MBP (mol:mol)" )))+
+    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
+    scale_fill_manual(values = c("grey", "white"))+
+    ggtitle("B)")+scale_y_continuous(limits = c(0, 80)),
+  
   mix %>% filter(Labelling=="NO" & TIME==0) %>% 
     group_by(Plesne, Horizon) %>% summarize(y.sd=sd(DOC/DON), y=mean(DOC/DON)) %>%
     ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Horizon), 
@@ -211,18 +226,8 @@ grid.arrange(
     ylab(expression(paste("DOC:DON (mol:mol)" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
-    ggtitle("B)")+scale_y_continuous(limits = c(10, 30)),
-  mix %>% filter(Labelling=="NO" & TIME==0) %>% 
-    group_by(Plesne, Horizon) %>% summarize(y.sd=sd(Cmic/Pmic), y=mean(Cmic/Pmic)) %>%
-    ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Horizon), 
-                                              position = position_dodge(width = 0.6), show.legend = F)+
-    geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5, 
-                  position = position_dodge(width = 0.6), show.legend = F)+
-    theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
-    ylab(expression(paste("MBC:MBP (mol:mol)" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
-    scale_fill_manual(values = c("grey", "white"))+
-    ggtitle("C)")+scale_y_continuous(limits = c(0, 80)),
+    ggtitle("C)")+scale_y_continuous(limits = c(10, 30)),
+  
   mix %>% filter(Labelling=="NO" & TIME==0) %>% 
     group_by(Plesne, Horizon) %>% summarize(y.sd=sd(DOC/DOP), y=mean(DOC/DOP)) %>%
     ggplot(aes(factor(Plesne), y))+geom_point(pch=21, cex=6, aes(fill=Horizon), 
@@ -301,20 +306,35 @@ Izo<-melt(izo, id.vars = c("Plesne", "Certovo", "Horizon", "Labelling"))
 ###Calculate delta values
 Izo$delta<-with(Izo, (value/(1-value)/0.011237-1)*1000)
 
+St<-as.numeric(Izo %>% filter(Plesne==0 & Horizon=="Litter" & variable=="CO2atm" & Labelling=="NO") %>%
+  summarize(mean(delta, na.rm=T)))
+St2<-as.numeric(Izo %>% filter(Plesne==1 & Horizon=="Litter" & variable=="CO2atm" & Labelling=="NO") %>%
+                 summarize(mean(delta, na.rm=T)))
+Izo$St<-NA
+Izo[(Izo$Horizon=="Litter"), "St"]<-St
+
+Izo$St2<-NA
+Izo[(Izo$Horizon=="Litter"), "St2"]<-St2
+
 Izo %>% filter(Labelling=="NO") %>%
   group_by(Plesne, Horizon, variable) %>% 
   summarize(y.sd=sd(delta, na.rm = T), y=mean(delta, na.rm = T)) %>%
   ggplot(aes(factor(Plesne), y))+geom_point(cex=6, pch=21, aes(fill=variable))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
   facet_grid(.~Horizon)+theme_min+
-  theme(legend.position = c(0.1, 0.85),
+  theme(legend.position = c(0.2, 0.85),
         legend.title = element_blank(),
         legend.text.align = 0)+
+  geom_hline(data=Izo, aes(yintercept=St), lwd=1, lty=2, color="grey30")+
+  geom_segment(data=Izo, aes(x=1, xend=5, y=St, yend=St2),
+               arrow = arrow(length = unit(0.5, "cm")),
+               color="grey30")+
   ylab(expression(paste(delta^{13},C)))+
   xlab("Plesne : Certovo mixing ratio")+
   scale_fill_manual(values = c("black", "grey", "white"),
                     name = '',
                     labels = expression(C-CO[2], K[2]~SO[4]-EC, MBC))
+
 
 ##Figure 6: Net change of water extractable mineral nitrogen (ΔMN) in litter (grey symbols) 
 ##and topsoil organic layer (empty circles) of two spruce forest soils (Plešné and Čertovo) 
@@ -353,6 +373,37 @@ mix_diff[(mix_diff$Cmic.prop<0), "Cmic.prop"]<-0
 
 mix_diff$dNm_predb<-with(mix_diff, U*(((1-Cmic.prop)*(DON/DOC)+Cmic.prop*(Nmic/Cmic))-Nmic*CUE/Cmic))
 
+#Log likelihoods
+##prediction a
+with(subset(mix_diff, Labelling=="NO"),
+     -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+       sum((dNH4+dNO3-dNm_preda)^2/2/sd(dNH4+dNO3)^2))
+##prediction b
+with(subset(mix_diff, Labelling=="NO"),
+     -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+       sum((dNH4+dNO3-dNm_predb)^2/2/sd(dNH4+dNO3)^2))
+
+#likelihood ratio test
+-2*(with(subset(mix_diff, Labelling=="NO"),
+         -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+           sum((dNH4+dNO3-dNm_preda)^2/2/sd(dNH4+dNO3)^2)) - 
+      with(subset(mix_diff, Labelling=="NO"),
+           -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+             sum((dNH4+dNO3-dNm_predb)^2/2/sd(dNH4+dNO3)^2)))
+
+pchisq(-2*(with(subset(mix_diff, Labelling=="NO"),
+                -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+                  sum((dNH4+dNO3-dNm_preda)^2/2/sd(dNH4+dNO3)^2)) - 
+             with(subset(mix_diff, Labelling=="NO"),
+                  -2/length(dNH4)*log(2*pi*sd(dNH4+dNO3)^2) - 
+                    sum((dNH4+dNO3-dNm_predb)^2/2/sd(dNH4+dNO3)^2))), df=1, lower.tail=FALSE)
+ann_texta <- data.frame(Plesne = 0.75, y = -5, lab = "LL = -254 ",
+                        Horizon = factor("Organic topsoil",
+                                         levels = c("Organic topsoil", "Litter")))
+ann_textb <- data.frame(Plesne = 0.75, y = -5, lab = "LL = -69 ",
+                        Horizon = factor("Organic topsoil",
+                                         levels = c("Organic topsoil", "Litter")))
+
 grid.arrange(
   mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
     summarize(y.sd=sd(dNm_preda), y=mean(dNm_preda),
@@ -368,7 +419,9 @@ grid.arrange(
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+ylim(-6.5, 1.5)+
-    ggtitle("A)"),
+    ggtitle("A)")+
+    geom_text(data = ann_texta, label=ann_texta$lab,
+              fontface="italic", size=8),
   mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
     summarize(y.sd=sd(dNm_predb), y=mean(dNm_predb),
               y2.sd=sd(dNH4+dNO3), y2=mean(dNH4+dNO3)) %>%
@@ -382,7 +435,9 @@ grid.arrange(
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+ylim(-6.5, 1.5)+
-    ggtitle("B)"), nrow=2)
+    ggtitle("B)")+
+    geom_text(data = ann_textb, label=ann_textb$lab,
+              fontface="italic", size=8), nrow=2)
 
 ##Figure 7: Net change of water extractable mineral phosphorus in litter (grey symbols) and 
 ##topsoil organic layer (empty circles) of two spruce forest soils (Plešné and Čertovo) mixed 
@@ -414,6 +469,74 @@ mix_diff[mix_diff$Sorption>1, "Sorption"]<-1
 ####Calculating the amount of chemicaly sorbed phosphate
 mix_diff$PO4sorbed<-with(mix_diff, PO4*(1-exp(-(1-Sorption)/0.75*48)))
 
+#Log likelihoods
+##prediction a
+with(subset(mix_diff, Labelling=="NO"),
+     -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+       sum((dPO4-dPm_preda)^2/2/sd(dPO4)^2))
+##prediction b
+with(subset(mix_diff, Labelling=="NO"),
+     -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+       sum((dPO4-dPm_predb)^2/2/sd(dPO4)^2))
+##prediction c
+with(subset(mix_diff, Labelling=="NO"),
+     -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+       sum((dPO4-PO4sorbed)^2/2/sd(dPO4)^2))
+
+#likelihood ratio test
+-2*(with(subset(mix_diff, Labelling=="NO"),
+         -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+           sum((dPO4-dPm_preda)^2/2/sd(dPO4)^2)) - 
+      with(subset(mix_diff, Labelling=="NO"),
+           -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+             sum((dPO4-dPm_predb)^2/2/sd(dPO4)^2)))
+
+pchisq(-2*(with(subset(mix_diff, Labelling=="NO"),
+                -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                  sum((dPO4-dPm_preda)^2/2/sd(dPO4)^2)) - 
+             with(subset(mix_diff, Labelling=="NO"),
+                  -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                    sum((dPO4-dPm_predb)^2/2/sd(dPO4)^2))), df=1, lower.tail=FALSE)
+
+-2*(with(subset(mix_diff, Labelling=="NO"),
+         -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+           sum((dPO4-dPm_preda)^2/2/sd(dPO4)^2)) - 
+      with(subset(mix_diff, Labelling=="NO"),
+           -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+             sum((dPO4-PO4sorbed)^2/2/sd(dPO4)^2)))
+
+pchisq(-2*(with(subset(mix_diff, Labelling=="NO"),
+                -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                  sum((dPO4-dPm_preda)^2/2/sd(dPO4)^2)) - 
+             with(subset(mix_diff, Labelling=="NO"),
+                  -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                    sum((dPO4-PO4sorbed)^2/2/sd(dPO4)^2))), df=1, lower.tail=FALSE)
+
+-2*(with(subset(mix_diff, Labelling=="NO"),
+         -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+           sum((dPO4-dPm_predb)^2/2/sd(dPO4)^2)) - 
+      with(subset(mix_diff, Labelling=="NO"),
+           -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+             sum((dPO4-PO4sorbed)^2/2/sd(dPO4)^2)))
+
+pchisq(-2*(with(subset(mix_diff, Labelling=="NO"),
+                -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                  sum((dPO4-dPm_predb)^2/2/sd(dPO4)^2)) - 
+             with(subset(mix_diff, Labelling=="NO"),
+                  -2/length(dPO4)*log(2*pi*sd(dPO4)^2) - 
+                    sum((dPO4-PO4sorbed)^2/2/sd(dPO4)^2))), df=1, lower.tail=FALSE)
+
+
+p_texta <- data.frame(Plesne = 0.25, y = -2, lab = paste("LL = -68e4"),
+                        Horizon = factor("Organic topsoil",
+                                         levels = c("Organic topsoil", "Litter")))
+p_textb <- data.frame(Plesne = 0.25, y = -2, lab = "LL = -38e4",
+                        Horizon = factor("Organic topsoil",
+                                         levels = c("Organic topsoil", "Litter")))
+p_textc <- data.frame(Plesne = 0.25, y = -0.045, lab = "LL = -583",
+                      Horizon = factor("Organic topsoil",
+                                       levels = c("Organic topsoil", "Litter")))
+
 grid.arrange(
   mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
     summarize(y.sd=sd(dPm_preda), y=mean(dPm_preda),
@@ -423,13 +546,15 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank(),
-          axis.title.x = element_blank())+
+          axis.title.x = element_blank(),
+          plot.margin = unit(c(0.075, 0.075, 0.075,0.45), "in"))+
     ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
-    ggtitle("A)"),
+    ggtitle("A)")+geom_text(data = p_texta, label=p_texta$lab,
+                           fontface="italic", size=8),
   mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
     summarize(y.sd=sd(dPm_predb), y=mean(dPm_predb),
               y2.sd=sd(dPO4), y2=mean(dPO4)) %>%
@@ -438,13 +563,16 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank(),
-          axis.title.x = element_blank())+
+          axis.title.x = element_blank(),
+          plot.margin = unit(c(0.075, 0.075, 0.075,0.45), "in"))+
     ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
     xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
-    ggtitle("B)"),
+    ggtitle("B)")+
+    geom_text(data = p_textb, label=p_textb$lab,
+              fontface="italic", size=8),
   mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
     summarize(y.sd=sd(-PO4sorbed), y=mean(-PO4sorbed),
               y2.sd=sd(dPO4), y2=mean(dPO4)) %>%
@@ -457,7 +585,9 @@ grid.arrange(
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
-    ggtitle("C)"), ncol=1)
+    ggtitle("C)")+
+    geom_text(data = p_textc, label=p_textc$lab,
+              fontface="italic", size=8), ncol=1)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #Supplementary information
 ##Stoichiometry
