@@ -1,6 +1,6 @@
 ################################################################################################
-#Biological and stoichiometric controls over nutrients mineralization and immobilization in two#
-###################################spruce forest soils##########################################
+#####Stoichiometric and microbial controls over nutrients mineralization and immobilization#####
+################################################################################################
 ################################################################################################
 #Libraries
 library(dplyr)
@@ -182,12 +182,14 @@ anova(Pm_t, test="F")
 ###############################Figures and calculations####################################
 ###########################################################################################
 #MAIN TEXT
-##Figure 2: Initial values of microbial biomass carbon to nitrogen (MBC:MBN; A) and phosphorus 
-##(MBC:MBP; C) ratio, and water extractable organic carbon to nitrogen (DOC:DON; B) and phosphorus (DOC:DOP; D)  
-##ratio in two spruce forest soils (Plešné and Čertovo) mixed at three different ratios (i.e. ¼, ½, and ¾). 
-##Grey circles denote litter layer and empty circles topsoil organic layer. 
-##Symbols represent mean values (n = 4) and error bars standard deviation of the mean. 
-##Notice that all plots have different y-axes scales.
+##Figure 1: Initial values ratios of microbial biomass carbon to (A) nitrogen (MBC:MBN) 
+##and (B) phosphorus (MBC:MBP) ratio, and water extractable organic carbon to (C) nitrogen 
+##(DOC:DON) and (D) phosphorus (DOC:DOP) ratio in two spruce forest soils (Plešné and 
+##Čertovo catchments) mixed at five different ratios 
+##(i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). Grey circles 
+##denote litter horizon and empty circles topsoil organic horizon. Symbols represent mean 
+##values and error bars standard deviation of the mean (n = 4). Notice that plots have 
+##different y-axes scales.
 
 grid.arrange(
   mix %>% filter(Labelling=="NO" & TIME==0) %>% 
@@ -198,7 +200,7 @@ grid.arrange(
                   position = position_dodge(width = 0.6))+
     theme_min+theme(legend.position = c(0.6, 0.8), legend.title = element_blank())+
     ylab(expression(paste("MBC:MBN (mol:mol)" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
+    xlab("PL : CT mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("A)")+scale_y_continuous(limits = c(10, 20),
                                      breaks = c(10, 12, 14, 16, 18, 20)),
@@ -212,7 +214,7 @@ grid.arrange(
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank(),
                     plot.margin = unit(c(0.05, 0.05, 0.05, 0.35), "in"))+
     ylab(expression(paste("MBC:MBP (mol:mol)" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
+    xlab("PL : CT mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("B)")+scale_y_continuous(limits = c(0, 80)),
   
@@ -224,7 +226,7 @@ grid.arrange(
                   position = position_dodge(width = 0.6), show.legend = F)+
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
     ylab(expression(paste("DOC:DON (mol:mol)" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
+    xlab("PL : CT mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("C)")+scale_y_continuous(limits = c(10, 30)),
   
@@ -236,16 +238,17 @@ grid.arrange(
                   position = position_dodge(width = 0.6), show.legend = F)+
     theme_min+theme(legend.position = c(0.8, 0.9), legend.title = element_blank())+
     ylab(expression(paste("DOC:DOP (mol:mol)" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_color_manual(values = c("black", "black"))+
+    xlab("PL : CT mixing ratio")+scale_color_manual(values = c("black", "black"))+
     scale_fill_manual(values = c("grey", "white"))+
     ggtitle("D)")+scale_y_continuous(limits = c(0, 2000)), ncol=2)
 
-##Figure 3: Net change of soil microbial biomass carbon (MBC; A), nitrogen (MBN; B) 
-##and phosphorus (MBP; C) 
-##after 48 hours incubation of two spruce forest soils (Plešné and Čertovo) mixed at three 
-##different ratios (i.e. ¼, ½, and ¾). Grey circles denote litter layer and empty circles 
-##topsoil organic layer. Symbols represent mean values (n = 4) and error bars standard 
-##deviation of the mean. Notice that both plots have different y-axes scales.
+##Figure 2: Net change of soil microbial biomass (A) carbon (MBC), (B) nitrogen (MBN) and 
+##(C) phosphorus (MBP) after 48-hour incubation of two spruce forest soils (Plešné and 
+##Čertovo catchments) mixed at five different ratios 
+##(i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). Grey circles 
+##denote litter horizon and empty circles topsoil organic horizon. Symbols represent mean 
+##values and error bars standard deviation of the mean (n = 4). Notice that plots have
+##different y-axes scales.
 mix_diff<-mix[c(1:80), c("Plesne", "Certovo", "Horizon", "Labelling")]
 mix_diff$dCmic<-mix[c(81:160), c("Cmic")]-mix[c(1:80), c("Cmic")]
 mix_diff$dNmic<-mix[c(81:160), c("Nmic")]-mix[c(1:80), c("Nmic")]
@@ -260,7 +263,7 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6))+
     ylab(expression(paste(Delta~MBC, " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.65, 0.8),
                                             legend.key.size = unit(0.3, "in"),
@@ -274,7 +277,7 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6), show.legend = F)+
     ylab(expression(paste(Delta~MBN, " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+#scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.8, 0.8),
                                             legend.key.size = unit(0.3, "in"),
@@ -288,18 +291,22 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd, colour=Horizon), width=0.1, lwd=0.5,
                   position = position_dodge(width = 0.6), show.legend = F)+
     ylab(expression(paste(Delta~MBP, " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     scale_color_manual(values = c("black", "black"))+#scale_y_continuous(breaks = c(-150, -100, -50, 0, 50, 100))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.position = c(0.8, 0.8),
                                             legend.key.size = unit(0.3, "in"),
                                             legend.title = element_blank())+
     ggtitle("C)"), ncol=3)
 
-##Figure 4: Isotopic signal of respired CO2 (black symbols), K2SO4 extractable organic carbon 
-##(K2SO4 - EC, grey symbols) and microbial biomass carbon (MBC, empty symbols) in litter and 
-##topsoil organic layer of two spruce forest soils (Plešné and Čertovo) mixed at three 
-##different ratios (i.e. ¼, ½, and ¾). Symbols represent mean values (n = 4) and error bars 
-##standard deviation of the mean. 
+##Figure 3: Isotopic signal of respired CO2 (black symbols), K2SO4 extractable organic carbon 
+##(K2SO4 - EC, grey symbols), and microbial biomass carbon (MBC, empty symbols) in litter and 
+##topsoil organic horizons of two spruce forest soils (Plešné and Čertovo catchments) mixed at 
+##five different ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). 
+##Symbols represent mean values and error bars standard deviation of the mean (n = 4). Horizontal 
+##dashed line represents the approximation of the isotope signal of organic compounds consumed by 
+##microbial biomass. Solid arrow shows the change of isotopic signal of respired CO2 across soil 
+##mixture that was used to calculate fMBC (see section 2.5. for details).
+
 izo<-mix[c(81:160), c("Plesne", "Certovo", "Horizon", "Labelling", "CO2atm",
                    "DOCatm", "Cmicatm")]
 Izo<-melt(izo, id.vars = c("Plesne", "Certovo", "Horizon", "Labelling"))
@@ -330,17 +337,19 @@ Izo %>% filter(Labelling=="NO") %>%
                arrow = arrow(length = unit(0.5, "cm")),
                color="grey30")+
   ylab(expression(paste(delta^{13},C)))+
-  xlab("Plesne : Certovo mixing ratio")+
+  xlab("PL : CT mixing ratio")+
   scale_fill_manual(values = c("black", "grey", "white"),
                     name = '',
-                    labels = expression(C-CO[2], K[2]~SO[4]-EC, MBC))
+                    labels = expression(R, K[2]~SO[4]-EC, MBC))
 
 
-##Figure 6: Net change of water extractable mineral nitrogen (ΔMN) in litter (grey symbols) 
-##and topsoil organic layer (empty circles) of two spruce forest soils (Plešné and Čertovo) 
-##mixed at three different ratios (i.e. ¼, ½, and ¾). Blue circles represent ΔMN calculated 
-##using eq. 1 with (A) and without (B) fMBC (for details see Materials and methods section). 
-##Symbols represent mean values (n = 4) and error bars standard deviation of the mean.
+##Figure 4: Net change of water extractable mineral nitrogen (ΔMN) in litter (grey symbols) and 
+##topsoil organic horizons (empty circles) of two spruce forest soils (Plešné and Čertovo catchments) 
+##mixed at five different ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to 
+##Plešné). Blue circles represent ΔMN calculated using eq. 1 with (A) and without (B) fMBC 
+##(see section 2.5. for details). Symbols represent mean values and error bars standard deviation 
+##of the mean (n = 4). Correspondence between the predictions and observations is reported as log 
+##likelihood (LL, eq. 7). The higher LL (less negative), the better the correspondence.
 
 ###Assuming no contribution of decaying microbial biomass
 mix_diff$CUE<-mix[c(1:80), c("CUE")]
@@ -415,7 +424,7 @@ grid.arrange(
           legend.title = element_blank(),
           axis.title.x = element_blank())+
     ylab(expression(paste(italic(Delta~M[N]), " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+ylim(-6.5, 1.5)+
@@ -431,7 +440,7 @@ grid.arrange(
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
           legend.title = element_blank())+
     ylab(expression(paste(italic(Delta~M[N]), " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+ylim(-6.5, 1.5)+
@@ -439,15 +448,15 @@ grid.arrange(
     geom_text(data = ann_textb, label=ann_textb$lab,
               fontface="italic", size=8), nrow=2)
 
-##Figure 7: Net change of water extractable mineral phosphorus in litter (grey symbols) and 
-##topsoil organic layer (empty circles) of two spruce forest soils (Plešné and Čertovo) mixed 
-##at three different ratios (i.e. ¼, ½, and ¾). Blue circles represent expected change of water 
-##extractable mineral phosphorus assuming that (A): the entire source of organic carbon and 
-##phosphorus for microbial growth is soil derived, (B): decaying microbial biomass partly 
-##contribute to the source of organic carbon and phosphorus (for details see Materials and 
-##methods section) or (C): microbial biomass growth is independent of soil phosphorus and the 
-##sorption characteristics of the soil affects mineral phosphorus concentration. Symbols 
-##represent mean values (n = 4) and error bars standard deviation of the mean.
+##Figure 5: Net change of water extractable soluble reactive phosphorus (ΔMP) in litter 
+##(grey symbols) and topsoil organic horizons (empty circles) of two spruce forest soils 
+##(Plešné and Čertovo catchments) mixed at five different ratios 
+##(i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). Blue circles 
+##represent ΔMN calculated using eq. 1 with (A) and without (B) fMBC and (C) chemically 
+##adsorbed SRP (PX) calculated using eq. 6 (see section 2.5. for details). Symbols represent 
+##mean values and error bars standard deviation of the mean (n = 4). Correspondence between 
+##the predictions and observations is reported as log likelihood (LL, eq. 7). The higher LL 
+##(less negative), the better the correspondence.
 
 ###Assuming no contribution of decaying microbial biomass
 mix_diff$DOP<-mix[c(1:80), c("DOP")]
@@ -549,7 +558,7 @@ grid.arrange(
           axis.title.x = element_blank(),
           plot.margin = unit(c(0.075, 0.075, 0.075,0.45), "in"))+
     ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
@@ -566,7 +575,7 @@ grid.arrange(
           axis.title.x = element_blank(),
           plot.margin = unit(c(0.075, 0.075, 0.075,0.45), "in"))+
     ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
@@ -581,20 +590,58 @@ grid.arrange(
     geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
     theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"))+
     ylab(expression(paste(italic(Delta~M[P]), " (", mu, "mol ",g^{-1}, ")" )))+
-    xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
+    xlab("PL : CT mixing ratio")+scale_fill_manual(values = c("grey", "white"))+
     geom_hline(yintercept = 0, lwd=1)+theme(legend.title = element_blank())+
     geom_point(cex=6, pch=21, aes(Plesne, y2, fill=Horizon), show.legend = F)+
     geom_errorbar(aes(ymin=y2-y2.sd, ymax=y2+y2.sd), width=0.1, lwd=0.5)+
     ggtitle("C)")+
     geom_text(data = p_textc, label=p_textc$lab,
               fontface="italic", size=8), ncol=1)
+
+##Figure 6: Expected growth rate of soil microbial community in the litter (grey circles) and 
+##organic topsoil (empty circles) horizons without the external source of phosphorus 
+##(i.e., phosphors demand is covered exclusively from internal resources). Symbols represent 
+##mean values and error bars standard deviation of the mean (n = 4). Expected growth rate 
+##(solid black line) was calculated from the measured MBC:MBP ratios using previously derived 
+##relationship between MBC:MBP ratios and growth rate in absence of external source of phosphorus 
+##(light grey points; Čapek et al. (2016)). Horizontal solid line denotes zero growth rate.
+
+####Read data
+gr<-read.csv("./manuscript_data_and_code/capek2016_data_SI.csv")
+
+####Estimate the growth rate for all sample
+cpred<-coef(lm(u0~CP, gr))
+mix_diff$grate_pred<-with(mix_diff, cpred[1]+(Cmic/Pmic)*cpred[2])
+
+gr_pred<-mix_diff %>% filter(Labelling=="NO") %>%
+  group_by(Plesne, Horizon) %>% summarize(CP=mean(Cmic/Pmic, na.rm = T),
+                                          CP.sd=sd(Cmic/Pmic, na.rm = T),
+                                          growth=mean(grate_pred, na.rm = T),
+                                          growth.sd=sd(grate_pred, na.rm = T))
+ggplot(data=gr_pred, aes(CP, growth))+geom_point(cex=6, pch=21, aes(fill=Horizon))+
+  theme_min+
+  xlab("MBC:MBP (mol:mol)")+
+  ylab(expression(paste(mu[0])))+
+  geom_hline(yintercept = 0, color='grey')+
+  geom_errorbarh(aes(xmin=CP-CP.sd, xmax=CP+CP.sd))+
+  geom_errorbar(aes(ymin=growth-growth.sd, ymax=growth+growth.sd))+
+  geom_point(data=gr, cex=6, color='grey', alpha=0.5, aes(CP, u0))+
+  stat_smooth(data=gr, aes(CP, u0), method = lm, se=F, color='black', lwd=0.5, fullrange = T)+
+  scale_fill_manual(values = c("grey", "white"))+
+  theme(legend.position = c(0.8, 0.8),
+        legend.title = element_blank())+
+  scale_x_continuous(breaks = c(20, 40, 60, 80, 100))+
+  scale_y_continuous(breaks=c(-1, -0.5, 0, 0.5, 1, 1.5, 2))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #Supplementary information
 ##Stoichiometry
-###Figure S1: Molar C/N (A) and C/P ratios of plant litter inputs into low elevation localities of Plesne 
-###(red circles) and Certovo (black circles) catchments with tree vegetation mostly unaffected by bark beetle 
-###infestation. Symbols represent medians and error bars lower and upper quartiles. The data for shown in this
-###figure can be downloaded at https://link.springer.com/article/10.1007/s10533-018-0470-x#SupplementaryMaterial. 
+##Figure S1: Molar (A) C/N and (B) C/P ratios of plant litterfall in Plešné (red circles) and 
+##Čertovo (black circles) catchments. The chemical composition of litterfall was measured at 
+##the localities with aboveground vegetation unaffected by bark beetle infestation. Symbols 
+##represent medians and error bars lower and upper quartiles. The data shown in this figure 
+##can be downloaded at 
+##https://link.springer.com/article/10.1007/s10533-018-0470-x#SupplementaryMaterial. 
 
 #Please specify the path of the downloaded file
 fluxes<-read.xlsx(xlsxFile = c("./10533_2018_470_MOESM7_ESM.xlsx"), 2)
@@ -625,17 +672,18 @@ grid.arrange(
     ylab("C/P of plant litter input (mol/mol)")+
     ggtitle("B"), ncol=1)
 
-###Figure S2: Molar DOC/DON (A, water extractable organic carbon to nitrogen), 
-###DOC/DOP (B, water extractable organic carbon to phosphorus), 
-###MBC/MBN (C, microbial biomass carbon to nitrogen), 
-###MBC/MBP (D, microbial biomass carbon to phosphorus) and 
-###MBN/MBN (E, microbial biomass nitrogen to phosphorus) ratio in litter (empty symbols) and 
-###topsoil organic layer (grey symbols) of two spruce forest soils (Plesne and Certovo) 
-###mixed at three different ratios (i.e. ¼, ½, and ¾). Triangles denote the values of 
-###respective ratio at the beginning of the incubation and circles the values at the end of 
-###the incubation. The effect of soil layer (Horizon), the proportion between Plesne and 
-###Certovo in soil mixture (Plesne : Certovo) and time on respective ratios is reported. 
-###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+##Figure S2: Molar (A) DOC/DON (water extractable organic carbon to nitrogen), (B) DOC/DOP 
+##(water extractable organic carbon to phosphorus), (C) MBC/MBN ( microbial biomass carbon to 
+##nitrogen), (D) MBC/MBP (microbial biomass carbon to phosphorus) and (E) MBN/MBN (microbial 
+##biomass nitrogen to phosphorus) ratios in the litter (empty symbols) and topsoil organic 
+##horizons (grey symbols) of two spruce forest soils (Plešné and Čertovo catchments) mixed 
+##at five different ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). 
+##Triangles and circles denote the values measured at the beginning and at the end of the incubation, 
+##respectively. Symbols represent mean values and error bars standard deviation of the mean (n = 4). 
+##The effect of soil horizon (Horizon), the proportion between Plešné and Čertovo in soil mixture 
+##(Plesne : Certovo) and time on respective ratios is reported. 
+##Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+
 mix$Legend<-ifelse(mix$TIME==0, "Before incubation", "After incubation")
 anova(glm(DOC/DON~Horizon+Plesne/Horizon+TIME/Plesne/Horizon, 
           data = subset(mix, Labelling=="NO"),
@@ -723,14 +771,15 @@ mix %>% filter(Labelling=="NO") %>%
 
 
 ##Initial conditions
-###Figure S3: Initial pH (A), amount of water extractable organic carbon (B), ammonia (C), 
-###nitrates (D), organic nitrogen (E), organic phosphorus (F), phosphate (G), microbial biomass 
-###carbon (H), nitrogen (I) and phosphorus (J) in litter (empty circles) and topsoil organic 
-###layer (grey circles) of two spruce forest soils (Plesne and Certovo) mixed 
-###at three different ratios (i.e. ¼, ½, and ¾). The effect of soil layer (Horizon) and the 
-###proportion between Plesne and Certovo in soil mixture (Plesne : Certovo) on respective soil 
-###characteristic is reported. 
-###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+##Figure S3: Initial values of (A) pH, (B) amount of water extractable organic carbon, (C) ammonia,
+##(D) nitrates, (E) organic nitrogen, (F) organic phosphorus, (G) phosphate, (H) microbial biomass 
+##carbon, (I) nitrogen and (J) phosphorus in the litter (empty circles) and topsoil organic horizons
+##(grey circles) of two spruce forest soils (Plešné and Čertovo catchments) mixed at five different 
+##ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). Symbols represent
+##mean values and error bars standard deviation of the mean (n = 4). The effect of soil horizon 
+##(Horizon) and the proportion between Plešné and Čertovo in soil mixture (Plešné : Čertovo) on 
+##respective soil characteristic is reported.
+##Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
 
 anova(glm(pH~Horizon+Plesne/Horizon, mix, family = Gamma), test="F")
 mix %>% group_by(Plesne, Horizon) %>% summarize(y.sd=sd(pH), y=mean(pH)) %>%
@@ -854,12 +903,13 @@ mix %>% filter(Labelling=="NO" & TIME==0) %>%
   ggtitle("J")
 
 ##Microbial physiology
-###Figure S4: CUE (A, carbon use efficiency) and microbial biomass carbon turnover rate (B) 
-###in litter (empty symbols) and topsoil organic layer (grey symbols) of two spruce forest 
-###soils (Plesne and Certovo) mixed at three different ratios (i.e. ¼, ½, and ¾). 
-###The effect of soil layer (Horizon) and the proportion between Plesne and Certovo in soil 
-###mixture (Plesne : Certovo) on respective microbial characteristics is reported. 
-###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+##Figure S4: CUE (carbon use efficiency) of microbial biomass in the litter (empty symbols) and 
+##topsoil organic horizon (grey symbols) of two spruce forest soils (Plešné and Čertovo catchments) 
+##that have been mixed at five different ratios (i.e. 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25 and, 1:0 in 
+##respect to Plešné). Symbols represent mean values and error bars standard deviation of the mean 
+##(n = 4). The effect of soil horizon (Horizon) and the proportion between Plešné and Čertovo in soil 
+##mixture (Plešné : Čertovo) on CUE is reported. 
+##Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
 
 anova(glm(CUE~Horizon+Plesne/Horizon, mix_diff, subset = Labelling =="NO",
           family=Gamma), test="F")
@@ -873,36 +923,15 @@ mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>%
   ylim(0.4, 0.9)+
   ylab("CUE")+xlab("Plesne : Certovo mixing ratio")+
   annotate("text", label="Horizon***", 0.5, 0.5, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo**", 0.5, 0.45, hjust="left", size=6, fontface="italic")+
-  ggtitle("A")
+  annotate("text", label="Plesne : Certovo**", 0.5, 0.45, hjust="left", size=6, fontface="italic")
 
-####Calculate the turnover rate
-mix_diff$growth<-with(mix_diff, CO2*CUE/(1-CUE))
-mix_diff$turnover<-(-log(mix_diff$dCmic+mix_diff$growth)+log(mix_diff$Cmic))/48
-
-anova(glm(turnover~Horizon+Plesne/Horizon, mix_diff, subset = Labelling =="NO",
-          family=Gamma), test="F")
-mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>% 
-  summarize(y.sd=sd(turnover, na.rm = T), y=mean(turnover, na.rm = T)) %>%
-  ggplot(aes(factor(Plesne),y))+geom_point(cex=6, pch=21, aes(fill=Horizon), show.legend = F)+
-  theme_min+geom_errorbar(width=0.1, aes(ymin=y-y.sd,ymax=y+y.sd))+
-  scale_fill_manual(values = c("white", "grey"))+
-  theme(legend.title = element_blank(),
-        legend.position = c(0.9, 0.15))+
-  #ylim(0, 0.09)+
-  ylab(expression(paste("turnover rate (", h^{-1}, ")")))+
-  xlab("Plesne : Certovo mixing ratio")+
-  annotate("text", label="Horizon n.s.", 0.5, 0.005, hjust="left", size=6, fontface="italic")+
-  annotate("text", label="Plesne : Certovo n.s", 0.5, 0, hjust="left", size=6, fontface="italic")+
-  ggtitle("B")
-
-
-###Figure S5: Cumulative CO2 loss from litter (empty symbols) and topsoil organic layer 
-###(grey symbols) of two spruce forest soils (Plesne and Certovo) that have been mixed at 
-###three different ratios (i.e. ¼, ½, and ¾). The effect of soil layer (Horizon) and the 
-###proportion between Plesne and Certovo in soil mixture (Plesne : Certovo) on cumulative CO2 
-###loss is reported. 
-###Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
+##Figure S5: Cumulative CO2 loss from the litter (empty symbols) and topsoil organic horizon 
+##(grey symbols) of two spruce forest soils (Plešné and Čertovo catchments) that have been mixed 
+##at five different ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in respect to Plešné). 
+##Symbols represent mean values and error bars standard deviation of the mean (n = 4). The effect of 
+##soil horizon (Horizon) and the proportion between Plešné and Čertovo in soil mixture 
+##(Plešné : Čertovo) on cumulative CO2 loss is reported.
+##Levels of significance: ***, p < 0.001; **, p < 0.01; *, p < 0.05; n.s., not significant.
 
 anova(glm(CO2~Horizon+Plesne/Horizon, mix_diff, subset = Labelling=="NO",
           family=Gamma), test="F")
@@ -919,11 +948,12 @@ mix_diff %>% filter(Labelling=="NO") %>% group_by(Plesne, Horizon) %>%
   annotate("text", label="Horizon***", 0.5, 24, hjust="left", size=6, fontface="italic")+
   annotate("text", label="Plesne : Certovo**", 0.5, 22, hjust="left", size=6, fontface="italic")
 
-###Figure S6: Amount of lost carbon in form of CO2 (black circles), microbial biomass carbon 
-###(MBC, grey circles) and water extractable organic carbon (DOC, empty circles) in litter and
-###topsoil organic layer of two spruce forest soils (Plesne and Certovo) mixed at three 
-###different ratios (i.e. ¼, ½, and ¾). Symbols represent mean values (n = 4) and error bars 
-###standard deviation of the mean. Note that both graphs have different y-axis scales.
+##Figure S6: Amount of lost carbon in form of CO2 (black circles), microbial biomass carbon 
+##(MBC, grey circles) and water extractable organic carbon (DOC, empty circles) in the litter 
+##and topsoil organic horizon of two spruce forest soils (Plešné and Čertovo catchments) that 
+##have been mixed at five different ratios (i.e., 0:1, 0.25:0.75, 0.5:0.5, 0.75:0.25, and 1:0 in 
+##respect to Plešné). Symbols represent mean values and error bars standard deviation of the mean 
+##(n = 4). Note that graphs have different y-axis scales.
 
 mix_diff$dDOC<-mix[c(81:160), c("DOC")]-mix[c(1:80), c("DOC")]
 cbalance<-mix_diff[mix_diff$Labelling=="NO", 
@@ -948,38 +978,3 @@ Cbalance %>% group_by(Plesne, Horizon, variable) %>%
                     name = '',
                     labels = expression(C-CO[2], MBC, DOC))
 
-###Figure S7: Expected growth rate of microbial community in litter (grey circles) and organic
-###topsoil (empty circles) from Plešné and Čertovo catchments without the external source of 
-###phosphorus (i.e. phosphors demand is covered exclusively from internal resources). Symbols 
-###represent mean values (n = 4) and error bars standard deviation of the mean. Light grey 
-###points represent original dataset of topsoil horizons published in Čapek et al. (2016). 
-###Solid black line represents linear relationship between microbial biomass carbon to phosphorus 
-###ratio and growth rate in absence of external source of phosphorus. 
-###Horizontal grey line denotes growth rate zero.
-
-####Read data
-gr<-read.csv("./manuscript_data_and_code/capek2016_data_SI.csv")
-
-####Estimate the growth rate for all sample
-cpred<-coef(lm(u0~CP, gr))
-mix_diff$grate_pred<-with(mix_diff, cpred[1]+(Cmic/Pmic)*cpred[2])
-
-gr_pred<-mix_diff %>% filter(Labelling=="NO") %>%
-  group_by(Plesne, Horizon) %>% summarize(CP=mean(Cmic/Pmic, na.rm = T),
-                                          CP.sd=sd(Cmic/Pmic, na.rm = T),
-                                          growth=mean(grate_pred, na.rm = T),
-                                          growth.sd=sd(grate_pred, na.rm = T))
-ggplot(data=gr_pred, aes(CP, growth))+geom_point(cex=6, pch=21, aes(fill=Horizon))+
-  theme_min+
-  xlab("MBC/MBP (mol/mol)")+
-  ylab(expression(paste(mu[0])))+
-  geom_hline(yintercept = 0, color='grey')+
-  geom_errorbarh(aes(xmin=CP-CP.sd, xmax=CP+CP.sd))+
-  geom_errorbar(aes(ymin=growth-growth.sd, ymax=growth+growth.sd))+
-  geom_point(data=gr, cex=6, color='grey', alpha=0.5, aes(CP, u0))+
-  stat_smooth(data=gr, aes(CP, u0), method = lm, se=F, color='black', lwd=0.5, fullrange = T)+
-  scale_fill_manual(values = c("grey", "white"))+
-  theme(legend.position = c(0.8, 0.85),
-        legend.title = element_blank())+
-  scale_x_continuous(breaks = c(20, 40, 60, 80, 100))+
-  scale_y_continuous(breaks=c(-1, -0.5, 0, 0.5, 1, 1.5, 2))
