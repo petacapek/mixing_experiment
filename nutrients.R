@@ -467,25 +467,25 @@ mich2 %>% group_by(Plesne, znaceni, horizont, Legend) %>% summarize(y.sd=sd(DON2
   xlab("Plesne : Certovo mixing ratio")+scale_fill_manual(values = c("white", "grey"))
 
 ####zmeny
-ziv.zmeny<-mich2[1:80, c("Plesne", "Certovo", "horizont", "znaceni")]
-ziv.zmeny$dDOC<-mich2[81:160, "DOC"]-mich2[1:80, "DOC"]
-ziv.zmeny$dDOC2<-mich2[81:160, "DOC2"]-mich2[1:80, "DOC2"]
-ziv.zmeny$dNH4<-mich2[81:160, "NH4"]-mich2[1:80, "NH4"]
-ziv.zmeny$dNH42<-mich2[81:160, "NH42"]-mich2[1:80, "NH42"]
-ziv.zmeny$dNO3<-mich2[81:160, "NO3"]-mich2[1:80, "NO3"]
-ziv.zmeny$dNO32<-mich2[81:160, "NO32"]-mich2[1:80, "NO32"]
-ziv.zmeny$dDON<-mich2[81:160, "DON"]-mich2[1:80, "DON"]
-ziv.zmeny$dDON2<-mich2[81:160, "DON2"]-mich2[1:80, "DON2"]
-ziv.zmeny$dPO4<-mich2[81:160, "PO4"]-mich2[1:80, "PO4"]
-ziv.zmeny$dPO42<-mich2[81:160, "PO42"]-mich2[1:80, "PO42"]
-ziv.zmeny$CO2<-mich2[81:160, "CCO2c"]
-ziv.zmeny$CO2s<-mich2[81:160, "CCO2.s"]/mich2[81:160, "CCO2c"]
-ziv.zmeny$CUE<-mich2[81:160, "CUE"]
+ziv.zmeny<-mix[1:80, c("Plesne", "Certovo", "Horizon", "Labelling")]
+ziv.zmeny$dDOC<-mix[81:160, "DOC"]-mix[1:80, "DOC"]
+ziv.zmeny$dDOC2<-mix[81:160, "DOC2"]-mix[1:80, "DOC2"]
+ziv.zmeny$dNH4<-mix[81:160, "NH4"]-mix[1:80, "NH4"]
+ziv.zmeny$dNH42<-mix[81:160, "NH42"]-mix[1:80, "NH42"]
+ziv.zmeny$dNO3<-mix[81:160, "NO3"]-mix[1:80, "NO3"]
+ziv.zmeny$dNO32<-mix[81:160, "NO32"]-mix[1:80, "NO32"]
+ziv.zmeny$dDON<-mix[81:160, "DON"]-mix[1:80, "DON"]
+ziv.zmeny$dDON2<-mix[81:160, "DON2"]-mix[1:80, "DON2"]
+ziv.zmeny$dPO4<-mix[81:160, "PO4"]-mix[1:80, "PO4"]
+ziv.zmeny$dPO42<-mix[81:160, "PO42"]-mix[1:80, "PO42"]
+ziv.zmeny$CO2<-mix[81:160, "CCO2c"]
+ziv.zmeny$CO2s<-mix[81:160, "CCO2.s"]/mix[81:160, "CCO2c"]
+ziv.zmeny$CUE<-mix[81:160, "CUE"]
 ziv.zmeny$Sorption<-mich0$Sorption
 ##DOC
-ziv.zmeny %>% group_by(Plesne, znaceni, horizont) %>% summarize(y.sd=sd(dDOC), y=mean(dDOC)) %>%
-  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, pch=21, aes(fill=znaceni))+
-  facet_grid(.~horizont, scales="free")+theme_min+theme(legend.position = c(0.2, 0.2))+
+ziv.zmeny %>% group_by(Plesne, Labelling, Horizon) %>% summarize(y.sd=sd(dDOC), y=mean(dDOC)) %>%
+  ggplot(aes(factor(Plesne), y))+geom_point(cex=6, pch=21, aes(fill=Horizon))+
+  facet_grid(.~Horizon, scales="free")+theme_min+theme(legend.position = c(0.2, 0.2))+
   geom_errorbar(aes(ymin=y-y.sd, ymax=y+y.sd), width=0.1, lwd=0.5)+
   theme(legend.position = c(0.15, 0.2),legend.key.size = unit(0.3, "in"),
         legend.title = element_blank())+
